@@ -45,6 +45,14 @@
   <nav class="site-navigation">
     <ul>
       
+        <li><a href="/">主页</a></li>
+      
+        <li><a href="/archives">归档</a></li>
+      
+        <li><a href="/tags">标签</a></li>
+      
+        <li><a href="/about">关于</a></li>
+      
     </ul>
   </nav>
 </header>
@@ -55,15 +63,15 @@
 
   
     
-    <h3 class="article-title"><a href="/2024/01/05/hello-world/"><span>Hello World</span></a></h3>
+    <h3 class="article-title"><a href="/2022/08/07/19-译-Go内存模型/"><span>【译】更新中的 Go 内存模型 Updating the Go Memory Model</span></a></h3>
     
   
 
   <div class="article-top-meta">
     <span class="posted-on">
-      <a href="/2024/01/05/hello-world/" rel="bookmark">
-        <time class="entry-date published" datetime="2024-01-04T17:10:42.052Z">
-          2024-01-05
+      <a href="/2022/08/07/19-译-Go内存模型/" rel="bookmark">
+        <time class="entry-date published" datetime="2022-08-07T15:15:34.000Z">
+          2022-08-07
         </time>
       </a>
     </span>
@@ -75,20 +83,10 @@
   <div class="article-content">
     <div class="entry">
       
-        <p>Welcome to <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a target="_blank" rel="noopener" href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a target="_blank" rel="noopener" href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a target="_blank" rel="noopener" href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/writing.html">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/server.html">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/generating.html">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>
-
+        <p>当前 go 语言的内存模型是在 2009 年编写成的，后来进行了一些细微的修改，很明显，我们需要为当前的内存模型添加一些细节，这其中包括对竞争检测器明确的背书以及清楚地说明 sync 和 atomic 中的 API 是如何进行同步的。</p>
+<p>这一部分我们将重申 Go 的设计哲学和他目前的内存模型，在这之后我将概述我认为我们还应该对 Go 内存模型做哪些细微的调整。它以前面的 <a href="https://junebao.top/#/detail/105">硬件内存模型</a> 和 <a href="https://junebao.top/#/detail/108">编程语言内存模型</a> 为背景。</p>
+<p>我在 GitHub 上开了一个<a href="losadhwselfff2332dasd.xyz/">讨论区</a> 来收集关于这部分的意见和反馈。基于这些反馈，我会在本月晚些时候提交一份正式的提案。使用 GitHub 的讨论功能本身就是一场实验，对于重大的变化，我们试图找到一种合理的方式来扩大它的讨论范围。</p>
+        
       
     </div>
 
@@ -98,7 +96,146 @@
     <div class="article-meta pull-left">
 
     
+      
 
+    <span class="post-categories">
+      <i class="icon-categories"></i>
+        <a href="/categories/Go/">Go</a>
+    </span>
+    
+
+    
+    
+
+    <span class="post-tags">
+      <i class="icon-tags"></i>
+        <a href="/tags/go/">go</a><a href="/tags/译文/">译文</a>
+    </span>
+    
+
+    </div>
+
+    
+  </div>
+</article>
+
+
+
+  <article>
+
+  
+    
+    <h3 class="article-title"><a href="/2022/05/14/18-译-编程语言内存模型/"><span>【译】编程语言内存模型 Programming Language Memory Models</span></a></h3>
+    
+  
+
+  <div class="article-top-meta">
+    <span class="posted-on">
+      <a href="/2022/05/14/18-译-编程语言内存模型/" rel="bookmark">
+        <time class="entry-date published" datetime="2022-05-14T13:29:15.000Z">
+          2022-05-14
+        </time>
+      </a>
+    </span>
+  </div>
+
+
+  
+
+  <div class="article-content">
+    <div class="entry">
+      
+        <p>编程语言的内存模型回答了并行的程序可以依赖哪些（硬件）行为以便在线程之间共享内存的问题。例如，考虑以下类 c 程序, 其中 x 和 done 都是从零开始的：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Thread 1           // Thread 2</span></span><br><span class="line">x = <span class="number">1</span>;                <span class="keyword">while</span>(done == <span class="number">0</span>) &#123; <span class="comment">/* loop */</span> &#125;</span><br><span class="line">done = <span class="number">1</span>;             print(x);</span><br></pre></td></tr></table></figure>
+
+<p>程序尝试将变量 x 的值从线程 1 同步给线程 2，使用变量 done 作为准备好接收消息的信号，如果线程 1 和线程 2 都运行在自己专门的线程上，并且都执行结束，则该程序能保证按预期打印 1 吗？编程语言的内存模型回答了这个问题以及其他类似的问题。</p>
+        
+      
+    </div>
+
+  </div>
+
+  <div class="article-footer">
+    <div class="article-meta pull-left">
+
+    
+      
+
+    <span class="post-categories">
+      <i class="icon-categories"></i>
+        <a href="/categories/Go/">Go</a>
+    </span>
+    
+
+    
+    
+
+    <span class="post-tags">
+      <i class="icon-tags"></i>
+        <a href="/tags/go/">go</a><a href="/tags/译文/">译文</a>
+    </span>
+    
+
+    </div>
+
+    
+  </div>
+</article>
+
+
+
+  <article>
+
+  
+    
+    <h3 class="article-title"><a href="/2022/03/09/17-译-硬件内存模型/"><span>【译】硬件内存模型 Hardware Memory Models</span></a></h3>
+    
+  
+
+  <div class="article-top-meta">
+    <span class="posted-on">
+      <a href="/2022/03/09/17-译-硬件内存模型/" rel="bookmark">
+        <time class="entry-date published" datetime="2022-03-09T04:55:15.000Z">
+          2022-03-09
+        </time>
+      </a>
+    </span>
+  </div>
+
+
+  
+
+  <div class="article-content">
+    <div class="entry">
+      
+        <p>很久以前，当人们还在写单线程程序的时候，让程序跑的更快的一个最有效的办法就是什么也不做，因为下一代硬件和编译器的优化会使得程序更快但行为不发生改变。在这个童话般的时代，区分优化是否有效有一个简单的测试方法：如果程序员无法区分一个正确程序经过优化和未经优化的版本之间的（运行结果）差异（除速度更快外）那么优化就是有效的，也就是说，正确的优化不会改变程序的行为。</p>
+<p>但是多年前的某一天，硬件工程师们发现让单个处理器越来越快的魔法消失了，与此同时，他们发现了一种新的魔法，这能使得他们创造出拥有越来越多处理器的计算机。操作系统将这种硬件并行性抽象成线程 <code>Threads</code> 暴露给开发者。这种通过操作系统线程提供多处理器（能力）的魔法对硬件工程师很友好，但它给语言设计师、编译器作者和程序员带来了严重的问题。</p>
+<p>之前许多在单线程程序中不可见（因此有效）的硬件和编译器优化在多线程程序中变得可见。如果我们说有效的优化不会改变正确程序的行为，那么现在来看只能要么说这些优化是无效的，要么说程序是错误的，我们改如何抉择呢？</p>
+        
+      
+    </div>
+
+  </div>
+
+  <div class="article-footer">
+    <div class="article-meta pull-left">
+
+    
+      
+
+    <span class="post-categories">
+      <i class="icon-categories"></i>
+        <a href="/categories/Go/">Go</a>
+    </span>
+    
+
+    
+    
+
+    <span class="post-tags">
+      <i class="icon-tags"></i>
+        <a href="/tags/go/">go</a><a href="/tags/译文/">译文</a>
+    </span>
     
 
     </div>
