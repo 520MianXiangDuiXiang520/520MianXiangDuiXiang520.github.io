@@ -5,7 +5,7 @@ article {
 article a {
   color: #f03838;
 }
-article:not(:first-child):before {
+article:not(:nth-child(-n + 2)):before {
   content: '';
   width: 150px;
   height: 1px;

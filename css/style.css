@@ -509,11 +509,24 @@ header .site-navigation ul {
   margin: 0;
   font-size: 1.6em;
 }
+header .site-navigation ul .menu-cover {
+  background-color: #f03838;
+}
 header .site-navigation ul li {
   display: inline-block;
   margin: 0 0.5rem;
 }
 header .site-navigation ul li a {
+  display: block;
+}
+header .site-navigation ul li .menu-cover-a {
+  display: block;
+  color: #fff;
+  font-size: 1.6rem;
+  line-height: 2rem;
+  padding: 0 1rem;
+}
+header .site-navigation ul li .menu-uncover-a {
   display: block;
   color: #f03838;
   font-size: 1.6rem;
@@ -527,7 +540,7 @@ article {
 article a {
   color: #f03838;
 }
-article:not(:first-child):before {
+article:not(:nth-child(-n + 2)):before {
   content: '';
   width: 150px;
   height: 1px;
@@ -743,7 +756,7 @@ article.archive {
   margin: 2em auto;
 }
 .archive-post .archive-title {
-  font-size: 2.8em;
+  font-size: 2.3em;
   line-height: 1;
   position: relative;
   color: #212121;
@@ -823,7 +836,7 @@ article .archive-tags > span > span {
 }
 article .archive-tags,
 article .tags-cloud {
-  margin: 8rem 0;
+  margin: 1rem 0;
   font-size: 1.3rem;
   color: #9e9e9e;
 }

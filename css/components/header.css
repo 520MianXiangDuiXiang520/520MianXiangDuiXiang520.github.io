@@ -40,11 +40,24 @@ header .site-navigation ul {
   margin: 0;
   font-size: 1.6em;
 }
+header .site-navigation ul .menu-cover {
+  background-color: #f03838;
+}
 header .site-navigation ul li {
   display: inline-block;
   margin: 0 0.5rem;
 }
 header .site-navigation ul li a {
+  display: block;
+}
+header .site-navigation ul li .menu-cover-a {
+  display: block;
+  color: #fff;
+  font-size: 1.6rem;
+  line-height: 2rem;
+  padding: 0 1rem;
+}
+header .site-navigation ul li .menu-uncover-a {
   display: block;
   color: #f03838;
   font-size: 1.6rem;
