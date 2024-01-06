@@ -1,0 +1,594 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>SQL 操作 | Junebao</title>
+
+  
+  <meta name="author" content="Junebao">
+  
+
+  
+  <meta name="description" content="一些常用的 SQL 操作">
+  
+
+  
+  
+  <meta name="keywords" content="数据库">
+  
+
+  <meta id="viewport" name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  <meta property="og:title" content="SQL 操作"/>
+
+  <meta property="og:site_name" content="Junebao"/>
+
+  
+  <meta property="og:image" content="/favicon.ico"/>
+  
+
+  <link href="/favicon.ico" rel="icon">
+  <link rel="alternate" href="/atom.xml" title="Junebao" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+<div class="blog">
+  <div class="content">
+
+    <header>
+  <div class="site-branding">
+    <h1 class="site-title">
+      <a href="/">Junebao</a>
+    </h1>
+    <p class="site-description"></p>
+  </div>
+  <nav class="site-navigation">
+    <ul>
+      
+        
+          <li><a class="menu-uncover-a" href="/">主页</li>
+        
+      
+        
+          <li><a class="menu-uncover-a" href="/archives">归档</li>
+        
+      
+        
+          <li><a class="menu-uncover-a" href="/tags">标签</li>
+        
+      
+        
+          <li><a class="menu-uncover-a" href="/about">关于</li>
+        
+      
+    </ul>
+  </nav>
+</header>
+
+    <main class="site-main posts-loop">
+    <article>
+
+  
+    
+    <h3 class="article-title"><span>SQL 操作</span></h3>
+    
+  
+
+  <div class="article-top-meta">
+    <span class="posted-on">
+      <a href="/2021/12/15/SQL操作/" rel="bookmark">
+        <time class="entry-date published" datetime="2021-12-15T04:55:15.000Z">
+          2021-12-15
+        </time>
+      </a>
+    </span>
+  </div>
+
+
+  
+
+  <div class="article-content">
+    <div class="entry">
+      
+        <p>一些常用的 SQL 操作</p>
+<span id="more"></span>
+
+<h2 id="检索数据-SELECT"><a href="#检索数据-SELECT" class="headerlink" title="检索数据 SELECT"></a>检索数据 SELECT</h2><p>检索数据</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 检索单个列</span></span><br><span class="line"><span class="keyword">SELECT</span> 列名 <span class="keyword">FROM</span> table_name;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 检索多个列</span></span><br><span class="line"><span class="keyword">SELECT</span> 列<span class="number">1</span>, 列<span class="number">2</span> <span class="keyword">FROM</span> table_name;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 检索所有列</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> table_name;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 检索不同的值</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="keyword">DISTINCT</span> 列名 <span class="keyword">FROM</span> table_name;</span><br></pre></td></tr></table></figure>
+
+<p>限制检索结果</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- SQL Server / Access</span></span><br><span class="line"><span class="keyword">SELECT</span> TOP <span class="number">5</span> 列名 <span class="keyword">FROM</span> table_name;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- DB2</span></span><br><span class="line"><span class="keyword">SELECT</span> 列名 <span class="keyword">FROM</span> table_name <span class="keyword">FETCH</span> <span class="keyword">FIRST</span> <span class="number">5</span> <span class="keyword">ROWS</span> <span class="keyword">ONLY</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- Oracle</span></span><br><span class="line"><span class="keyword">SELECT</span> prod_name <span class="keyword">FROM</span> table_name <span class="keyword">WHERE</span> ROWNUM <span class="operator">&lt;=</span> <span class="number">5</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- MySQL / MariaDB / PostgreSQL / SQLite</span></span><br><span class="line"><span class="keyword">SELECT</span> prod_name <span class="keyword">FROM</span> table_name LIMIT <span class="number">5</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- MySQL 从第六行开始，检索五行</span></span><br><span class="line"><span class="keyword">SELECT</span> prod_name <span class="keyword">FROM</span> table_name LIMIT <span class="number">5</span> <span class="keyword">OFFSET</span> <span class="number">6</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- MySQL 与 MariaSQL 快捷键，上一条语句等价于：</span></span><br><span class="line"><span class="keyword">SELECT</span> prod_name <span class="keyword">FROM</span> table_name LIMIT <span class="number">6</span>,<span class="number">5</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="排序检索数据-ORDER-BY"><a href="#排序检索数据-ORDER-BY" class="headerlink" title="排序检索数据 ORDER BY"></a>排序检索数据 ORDER BY</h2><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 按单个列排序，默认从小到大</span></span><br><span class="line"><span class="keyword">SELECT</span> field1, field2 <span class="keyword">from</span> table_name <span class="keyword">ORDER</span> <span class="keyword">BY</span> field1;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 按多个列排序，先按第一个排，第一个相同再按第二个排</span></span><br><span class="line"><span class="keyword">SELECT</span> field1, field2 <span class="keyword">from</span> table_name <span class="keyword">ORDER</span> <span class="keyword">BY</span> field1, field2;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 按列位置排序</span></span><br><span class="line"><span class="keyword">SELECT</span> field1, field2 <span class="keyword">from</span> table_name <span class="keyword">ORDER</span> <span class="keyword">BY</span> <span class="number">4</span>,<span class="number">5</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 降序排序，与DESC相对的是ASC，但ASC是默认的，DESC只作用于他前面的那一列</span></span><br><span class="line"><span class="keyword">SELECT</span> field1, field2 <span class="keyword">from</span> table_name <span class="keyword">ORDER</span> <span class="keyword">BY</span> field1 <span class="keyword">DESC</span>,field2 <span class="keyword">DESC</span>;</span><br></pre></td></tr></table></figure>
+
+<h2 id="过滤数据-WHERE"><a href="#过滤数据-WHERE" class="headerlink" title="过滤数据 WHERE"></a>过滤数据 WHERE</h2><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- ORDER BY 语句应该始终放在最后</span></span><br><span class="line"><span class="keyword">SELECT</span> field1, field2 <span class="keyword">FROM</span> table_name <span class="keyword">WHERE</span> field1 <span class="operator">=</span> <span class="number">3</span>;</span><br></pre></td></tr></table></figure>
+
+<p>WHERE操作符</p>
+<table>
+<thead>
+<tr>
+<th>操作符</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>&#x3D;</td>
+<td>等于</td>
+</tr>
+<tr>
+<td>!&#x3D;或&lt;&gt;</td>
+<td>不等于</td>
+</tr>
+<tr>
+<td>&lt;（&gt;）</td>
+<td>小于（大于）</td>
+</tr>
+<tr>
+<td>&lt;&#x3D; （》&#x3D;）</td>
+<td>小于等于（大于等于）</td>
+</tr>
+<tr>
+<td>!&lt;</td>
+<td>不小于</td>
+</tr>
+<tr>
+<td>!&gt;</td>
+<td>不大于</td>
+</tr>
+<tr>
+<td>BETWEEN</td>
+<td>在指定两个值之间</td>
+</tr>
+<tr>
+<td>IS NULL</td>
+<td>为NULL值</td>
+</tr>
+</tbody></table>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 范围检查，范围需要用AND连接，包括边界</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> stu <span class="keyword">WHERE</span> grade <span class="keyword">BETWEEN</span> <span class="number">70</span> <span class="keyword">AND</span> <span class="number">100</span>;</span><br><span class="line"><span class="operator">+</span><span class="comment">----+----------+-----+-------+---------------------+</span></span><br><span class="line"><span class="operator">|</span> id <span class="operator">|</span> name     <span class="operator">|</span> sex <span class="operator">|</span> grade <span class="operator">|</span> birthday            <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">----+----------+-----+-------+---------------------+</span></span><br><span class="line"><span class="operator">|</span>  <span class="number">1</span> <span class="operator">|</span> zhangsan <span class="operator">|</span> boy <span class="operator">|</span>    <span class="number">99</span> <span class="operator">|</span> <span class="number">2019</span><span class="number">-09</span><span class="number">-12</span> <span class="number">19</span>:<span class="number">21</span>:<span class="number">31</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>  <span class="number">3</span> <span class="operator">|</span> wangwu   <span class="operator">|</span> boy <span class="operator">|</span>    <span class="number">77</span> <span class="operator">|</span> <span class="number">2019</span><span class="number">-09</span><span class="number">-03</span> <span class="number">19</span>:<span class="number">22</span>:<span class="number">52</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>  <span class="number">4</span> <span class="operator">|</span> zhaoliu  <span class="operator">|</span> boy <span class="operator">|</span>    <span class="number">77</span> <span class="operator">|</span> <span class="number">2019</span><span class="number">-09</span><span class="number">-10</span> <span class="number">19</span>:<span class="number">28</span>:<span class="number">22</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">----+----------+-----+-------+---------------------+</span></span><br><span class="line"><span class="number">3</span> <span class="keyword">rows</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.33</span> sec)</span><br></pre></td></tr></table></figure>
+
+<h3 id="高级数据过滤"><a href="#高级数据过滤" class="headerlink" title="高级数据过滤"></a>高级数据过滤</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- AND 操作</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> stu <span class="keyword">WHERE</span> grade<span class="operator">&gt;</span><span class="number">90</span> <span class="keyword">AND</span> sex <span class="operator">=</span> &quot;boy&quot;;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- OR 操作</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> stu <span class="keyword">WHERE</span> grade <span class="operator">&gt;</span> <span class="number">90</span> <span class="keyword">OR</span> grade <span class="operator">&lt;</span> <span class="number">60</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- IN 操作</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> stu <span class="keyword">WHERE</span> name <span class="keyword">IN</span> (<span class="string">&#x27;zhangsan&#x27;</span>, &quot;lisi&quot;);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- NOT操作</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> stu <span class="keyword">WHERE</span> <span class="keyword">NOT</span> name <span class="keyword">IN</span> (<span class="string">&#x27;zhangsan&#x27;</span>, &quot;lisi&quot;);</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>AND 操作符优先级高于OR，可以加括号改变优先级</li>
+<li>IN比OR执行更快</li>
+<li>IN可以包含其他SELECT语句</li>
+<li>NOT否定跟在它后面的语句</li>
+</ul>
+<h3 id="使用通配符进行数据过滤-LIKE"><a href="#使用通配符进行数据过滤-LIKE" class="headerlink" title="使用通配符进行数据过滤 LIKE"></a>使用通配符进行数据过滤 LIKE</h3><table>
+<thead>
+<tr>
+<th>通配符</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>%</td>
+<td>匹配任何字符出现任意次</td>
+</tr>
+<tr>
+<td>_</td>
+<td>匹配单个字符</td>
+</tr>
+<tr>
+<td>[]</td>
+<td>匹配指定位置的一个字符(只有SQL Server支持)</td>
+</tr>
+</tbody></table>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 匹配name中带有n的字段</span></span><br><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> stu <span class="keyword">where</span> name <span class="keyword">like</span> &quot;%n%&quot;;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 匹配name以z或w开头的字段（SQL Server）</span></span><br><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> stu <span class="keyword">where</span> name <span class="keyword">like</span> &quot;[zw]%&quot;;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>通配符搜索耗时比其他搜索长，不要依赖于通配符搜索</li>
+</ul>
+<h2 id="创建计算字段"><a href="#创建计算字段" class="headerlink" title="创建计算字段"></a>创建计算字段</h2><p>计算字段并不存在于数据库，只是在执行SELECT语句时生成的</p>
+<h3 id="拼接字段"><a href="#拼接字段" class="headerlink" title="拼接字段"></a>拼接字段</h3><table>
+<thead>
+<tr>
+<th>DBMS</th>
+<th>符号</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Access, SQL Server</td>
+<td>+</td>
+</tr>
+<tr>
+<td>DB2,Oracle,PostgreSQL,SQLite,Open Office Base</td>
+<td>&#96;</td>
+</tr>
+<tr>
+<td>Mysql,MariaDB</td>
+<td>使用<code>Concat()</code>函数</td>
+</tr>
+</tbody></table>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- SQL Server</span></span><br><span class="line"><span class="keyword">SELECT</span> name <span class="operator">+</span> &quot;(&quot; <span class="operator">+</span> grade <span class="operator">+</span> &quot;)&quot; <span class="keyword">FROM</span> stu <span class="keyword">ORDER</span> <span class="keyword">BY</span> grade;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- MySQL</span></span><br><span class="line"><span class="keyword">SELECT</span> CONCAT(name,&quot;(&quot;,grade,&quot;)&quot;) <span class="keyword">FROM</span> stu <span class="keyword">ORDER</span> <span class="keyword">BY</span> grade;</span><br><span class="line"><span class="operator">+</span><span class="comment">----------------------------+</span></span><br><span class="line"><span class="operator">|</span> CONCAT(name,&quot;(&quot;,grade,&quot;)&quot;) <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">----------------------------+</span></span><br><span class="line"><span class="operator">|</span> lisi(<span class="number">66</span>)                   <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> wangwu(<span class="number">77</span>)                 <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> zhaoliu(<span class="number">77</span>)                <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> zhangsan(<span class="number">99</span>)               <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">----------------------------+</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="使用别名"><a href="#使用别名" class="headerlink" title="使用别名"></a>使用别名</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- SQL Server</span></span><br><span class="line"><span class="keyword">SELECT</span></span><br><span class="line">name <span class="operator">+</span> &quot;(&quot; <span class="operator">+</span> grade <span class="operator">+</span> &quot;)&quot; <span class="keyword">AS</span> new_name</span><br><span class="line"><span class="keyword">FROM</span> stu <span class="keyword">ORDER</span> <span class="keyword">BY</span> grade;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- MySQL</span></span><br><span class="line"><span class="keyword">SELECT</span> CONCAT(name,&quot;(&quot;,grade,&quot;)&quot;) <span class="keyword">AS</span> new_name</span><br><span class="line"><span class="keyword">FROM</span> stu <span class="keyword">ORDER</span> <span class="keyword">BY</span> grade;</span><br><span class="line"><span class="operator">+</span><span class="comment">--------------+</span></span><br><span class="line"><span class="operator">|</span> new_name     <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">--------------+</span></span><br><span class="line"><span class="operator">|</span> lisi(<span class="number">66</span>)     <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> wangwu(<span class="number">77</span>)   <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> zhaoliu(<span class="number">77</span>)  <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> zhangsan(<span class="number">99</span>) <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">--------------+</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="执行算数运算"><a href="#执行算数运算" class="headerlink" title="执行算数运算"></a>执行算数运算</h3><p>支持 +，-，*，&#x2F;</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> ,</span><br><span class="line">grade<span class="operator">*</span><span class="number">0.1</span> <span class="keyword">AS</span> new_grade</span><br><span class="line"><span class="keyword">FROM</span> stu <span class="keyword">ORDER</span> <span class="keyword">BY</span> grade;</span><br><span class="line"><span class="operator">+</span><span class="comment">----+----------+-----+-------+---------------------+-----------+</span></span><br><span class="line"><span class="operator">|</span> id <span class="operator">|</span> name     <span class="operator">|</span> sex <span class="operator">|</span> grade <span class="operator">|</span> birthday            <span class="operator">|</span> new_grade <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">----+----------+-----+-------+---------------------+-----------+</span></span><br><span class="line"><span class="operator">|</span>  <span class="number">2</span> <span class="operator">|</span> lisi     <span class="operator">|</span> boy <span class="operator">|</span>    <span class="number">66</span> <span class="operator">|</span> <span class="number">2019</span><span class="number">-09</span><span class="number">-04</span> <span class="number">19</span>:<span class="number">22</span>:<span class="number">05</span> <span class="operator">|</span>       <span class="number">6.6</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>  <span class="number">3</span> <span class="operator">|</span> wangwu   <span class="operator">|</span> boy <span class="operator">|</span>    <span class="number">77</span> <span class="operator">|</span> <span class="number">2019</span><span class="number">-09</span><span class="number">-03</span> <span class="number">19</span>:<span class="number">22</span>:<span class="number">52</span> <span class="operator">|</span>       <span class="number">7.7</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>  <span class="number">4</span> <span class="operator">|</span> zhaoliu  <span class="operator">|</span> boy <span class="operator">|</span>    <span class="number">77</span> <span class="operator">|</span> <span class="number">2019</span><span class="number">-09</span><span class="number">-10</span> <span class="number">19</span>:<span class="number">28</span>:<span class="number">22</span> <span class="operator">|</span>       <span class="number">7.7</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>  <span class="number">1</span> <span class="operator">|</span> zhangsan <span class="operator">|</span> boy <span class="operator">|</span>    <span class="number">99</span> <span class="operator">|</span> <span class="number">2019</span><span class="number">-09</span><span class="number">-12</span> <span class="number">19</span>:<span class="number">21</span>:<span class="number">31</span> <span class="operator">|</span>       <span class="number">9.9</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">----+----------+-----+-------+---------------------+-----------+</span></span><br><span class="line"><span class="number">4</span> <span class="keyword">rows</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
+
+<h2 id="函数"><a href="#函数" class="headerlink" title="函数"></a>函数</h2><p>每个DBMS都支持自己特定的函数，只有少数函数被大多DBMS支持</p>
+<h3 id="数据处理函数"><a href="#数据处理函数" class="headerlink" title="数据处理函数"></a>数据处理函数</h3><p>文本处理函数</p>
+<table>
+<thead>
+<tr>
+<th>函数</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>LEFT()</td>
+<td>返回字符串左边的字符</td>
+</tr>
+<tr>
+<td>RIGHT()</td>
+<td>返回字符串右边字符</td>
+</tr>
+<tr>
+<td>LENGTH()或DATALENGTH()或LEN()</td>
+<td>返回字符串长度</td>
+</tr>
+<tr>
+<td>LOWER()  Access使用LCASE()</td>
+<td>将字符串转换为小写</td>
+</tr>
+<tr>
+<td>UPPER()  Access使用UCASE()</td>
+<td>将字符串转换为大写</td>
+</tr>
+<tr>
+<td>LTRIM()</td>
+<td>去掉字符串左边空格</td>
+</tr>
+<tr>
+<td>RTRIM()</td>
+<td>去掉字符串右边空格</td>
+</tr>
+<tr>
+<td>SOUNDEX()</td>
+<td>返回字符串的SOUNDEX值</td>
+</tr>
+</tbody></table>
+<ul>
+<li>soundex是判断读音是不是相同，可惜中文不行,有趣的是这个算法发明的时间比计算机发明的时间还早，哈哈哈</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> stu <span class="keyword">WHERE</span> SOUNDEX(name) <span class="operator">=</span> SOUNDEX(&quot;enn&quot;);</span><br><span class="line"><span class="operator">+</span><span class="comment">----+------+-----+-------+---------------------+</span></span><br><span class="line"><span class="operator">|</span> id <span class="operator">|</span> name <span class="operator">|</span> sex <span class="operator">|</span> grade <span class="operator">|</span> birthday            <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">----+------+-----+-------+---------------------+</span></span><br><span class="line"><span class="operator">|</span>  <span class="number">5</span> <span class="operator">|</span> en   <span class="operator">|</span> boy <span class="operator">|</span>    <span class="number">33</span> <span class="operator">|</span> <span class="number">2019</span><span class="number">-09</span><span class="number">-29</span> <span class="number">20</span>:<span class="number">41</span>:<span class="number">41</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">----+------+-----+-------+---------------------+</span></span><br></pre></td></tr></table></figure>
+
+<p>时间日期处理函数</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- SQL Server</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> stu <span class="keyword">WHERE</span> DATEPART(yy, birthday) <span class="operator">=</span> <span class="number">2012</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- Access</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> stu <span class="keyword">WHERE</span> DATEPART(&quot;yyyy&quot;, birthday) <span class="operator">=</span> <span class="number">2012</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- PostgreSQL</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> stu <span class="keyword">WHERE</span> DATE_PART(<span class="string">&#x27;year&#x27;</span>, birthday) <span class="operator">=</span> <span class="number">2012</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- Oracle</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> stu <span class="keyword">WHERE</span> to_number(to_char(birthday,<span class="string">&#x27;yyyy&#x27;</span>)) <span class="operator">=</span> <span class="number">2012</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- MySQL MairiaDB</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> stu <span class="keyword">WHERE</span> <span class="keyword">YEAR</span>(birthday) <span class="operator">=</span> <span class="number">2012</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- SQLite</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> stu <span class="keyword">WHERE</span> strftime(<span class="string">&#x27;%Y&#x27;</span>, birthday) <span class="operator">=</span> <span class="number">2102</span>;</span><br></pre></td></tr></table></figure>
+
+<p>数值处理函数</p>
+<table>
+<thead>
+<tr>
+<th>函数</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ABS()</td>
+<td>绝对值</td>
+</tr>
+<tr>
+<td>COS(),SIN(),TAN()</td>
+<td>余弦，正弦，正切</td>
+</tr>
+<tr>
+<td>PI()</td>
+<td>圆周率</td>
+</tr>
+<tr>
+<td>EXP()</td>
+<td>指数</td>
+</tr>
+<tr>
+<td>SQRT()</td>
+<td>平方根</td>
+</tr>
+</tbody></table>
+<h3 id="聚集函数"><a href="#聚集函数" class="headerlink" title="聚集函数"></a>聚集函数</h3><p>SQL聚集函数</p>
+<table>
+<thead>
+<tr>
+<th>函数</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>AVG()</td>
+<td>返回某列平均值</td>
+</tr>
+<tr>
+<td>COUNT()</td>
+<td>返回某列行数</td>
+</tr>
+<tr>
+<td>MAX() MIN()</td>
+<td>返回某列最大最小值</td>
+</tr>
+<tr>
+<td>SUM()</td>
+<td>返回某列之和</td>
+</tr>
+</tbody></table>
+<ul>
+<li>COUNT(*)对表中所有行计数，不管是否包含空值</li>
+<li>COUNT(列)对特定列中具有特定值的行计数，忽略空值</li>
+<li>可以使用DISTINCT聚集不同的值(Access不支持)</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span></span><br><span class="line"><span class="built_in">COUNT</span>(<span class="operator">*</span>) <span class="keyword">AS</span> count_num,</span><br><span class="line"><span class="built_in">AVG</span>(<span class="keyword">DISTINCT</span> grade) <span class="keyword">AS</span> avg_grade,</span><br><span class="line"><span class="built_in">MAX</span>(grade) <span class="keyword">AS</span> max_grade,</span><br><span class="line"><span class="built_in">MIN</span>(grade) <span class="keyword">AS</span> min_grade,</span><br><span class="line"><span class="built_in">SUM</span>(grade) <span class="keyword">AS</span> sun_grade</span><br><span class="line"><span class="keyword">FROM</span> stu;</span><br><span class="line"><span class="operator">+</span><span class="comment">-----------+-----------+-----------+-----------+-----------+</span></span><br><span class="line"><span class="operator">|</span> count_num <span class="operator">|</span> avg_grade <span class="operator">|</span> max_grade <span class="operator">|</span> min_grade <span class="operator">|</span> sun_grade <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-----------+-----------+-----------+-----------+-----------+</span></span><br><span class="line"><span class="operator">|</span>         <span class="number">6</span> <span class="operator">|</span>   <span class="number">74.2000</span> <span class="operator">|</span>        <span class="number">99</span> <span class="operator">|</span>        <span class="number">33</span> <span class="operator">|</span>       <span class="number">448</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-----------+-----------+-----------+-----------+-----------+</span></span><br><span class="line"><span class="number">1</span> <span class="type">row</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
+
+<h2 id="分组数据-GROUP-BY"><a href="#分组数据-GROUP-BY" class="headerlink" title="分组数据 GROUP BY"></a>分组数据 GROUP BY</h2><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> grade, <span class="built_in">count</span>(<span class="operator">*</span>) <span class="keyword">AS</span> nums <span class="keyword">from</span> stu <span class="keyword">group</span> <span class="keyword">by</span> grade;</span><br><span class="line"><span class="operator">+</span><span class="comment">-------+------+</span></span><br><span class="line"><span class="operator">|</span> grade <span class="operator">|</span> nums <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-------+------+</span></span><br><span class="line"><span class="operator">|</span>    <span class="number">99</span> <span class="operator">|</span>    <span class="number">1</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>    <span class="number">66</span> <span class="operator">|</span>    <span class="number">1</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>    <span class="number">77</span> <span class="operator">|</span>    <span class="number">2</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>    <span class="number">33</span> <span class="operator">|</span>    <span class="number">1</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>    <span class="number">96</span> <span class="operator">|</span>    <span class="number">1</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-------+------+</span></span><br><span class="line"><span class="number">5</span> <span class="keyword">rows</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>GROUP BY 子句可以包含任意数目的列，因此可以对分组进行嵌套，进行更细致的分组</li>
+<li>如果嵌套了分组，数据将在最后指定的分组上进行汇总。（所有列一起计算）</li>
+<li>GROUP BY 子句中列出的每一列都必须是检索列或有效的表达式（不能是聚集函数），如果在SELECT中使用表达式，则必须在GROUP子句中指定相同的表达式，不能使用别名.</li>
+<li>大多数DBMS不允许GROUP BY 带有长度可变的数据类型</li>
+<li>除聚集计算语句外，SELECT语句中的每一列都必须在GROUP BY中给出</li>
+<li>如果分组列中包含一个NULL值，则NULL作为一个分组返回，多个NULL作为一个分组。</li>
+<li>GROUP BY应该出现在WHERE之前，ORDER BY 之前。</li>
+</ul>
+<h3 id="过滤分组-HAVING"><a href="#过滤分组-HAVING" class="headerlink" title="过滤分组 HAVING"></a>过滤分组 HAVING</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> grade, <span class="built_in">count</span>(<span class="operator">*</span>) <span class="keyword">AS</span> nums <span class="keyword">from</span> stu <span class="keyword">group</span> <span class="keyword">by</span> grade <span class="keyword">having</span> grade <span class="operator">&gt;</span> <span class="number">60</span>;</span><br><span class="line"><span class="operator">+</span><span class="comment">-------+------+</span></span><br><span class="line"><span class="operator">|</span> grade <span class="operator">|</span> nums <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-------+------+</span></span><br><span class="line"><span class="operator">|</span>    <span class="number">99</span> <span class="operator">|</span>    <span class="number">1</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>    <span class="number">66</span> <span class="operator">|</span>    <span class="number">1</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>    <span class="number">77</span> <span class="operator">|</span>    <span class="number">2</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>    <span class="number">96</span> <span class="operator">|</span>    <span class="number">1</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-------+------+</span></span><br><span class="line"><span class="number">4</span> <span class="keyword">rows</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.10</span> sec)</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>HAVING 与 WHERE 的区别：<br>WHERE在数据分组前进行过滤，HAVING在数据分组后进行过滤，WHERE排除的行不包括在分组中，这可能会改变计算值，从而影响HAVING中基于这些值过滤掉的分组。<br>如果不指定GROUP BY 大多数DBMS会同等对待他们，不过，使用HAVING时应该结合GROUP BY 而WHERE应该用于标准的行级过滤。</p>
+</blockquote>
+<h3 id="分组和排序"><a href="#分组和排序" class="headerlink" title="分组和排序"></a>分组和排序</h3><p>GROUP BY　与　ORDER　BY　经常完成相同的工作，但他们非常不同，ORDER　BY　是对产生的输出进行排序，而GROUP　BY　是对行进行排序，但输出的可能不是分组的顺序，所以在使用GROUP　BY时，也应该给出ORDER　BY　子句。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">--- 除ACCESS外，大部分DBMS支持用别名排序</span></span><br><span class="line"><span class="keyword">select</span> grade, <span class="built_in">count</span>(<span class="operator">*</span>) <span class="keyword">AS</span> nums <span class="keyword">from</span> stu</span><br><span class="line">        <span class="keyword">group</span> <span class="keyword">by</span> grade <span class="keyword">having</span> grade <span class="operator">&gt;</span> <span class="number">60</span></span><br><span class="line">        <span class="keyword">order</span> <span class="keyword">by</span> <span class="built_in">count</span>(<span class="operator">*</span>);</span><br><span class="line"><span class="operator">+</span><span class="comment">-------+------+</span></span><br><span class="line"><span class="operator">|</span> grade <span class="operator">|</span> nums <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-------+------+</span></span><br><span class="line"><span class="operator">|</span>    <span class="number">66</span> <span class="operator">|</span>    <span class="number">1</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>    <span class="number">96</span> <span class="operator">|</span>    <span class="number">1</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>    <span class="number">99</span> <span class="operator">|</span>    <span class="number">1</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>    <span class="number">77</span> <span class="operator">|</span>    <span class="number">2</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-------+------+</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="子查询"><a href="#子查询" class="headerlink" title="子查询"></a>子查询</h2><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> songs <span class="keyword">where</span> singer <span class="keyword">in</span>  </span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> (<span class="keyword">select</span> id <span class="keyword">from</span> singer <span class="keyword">where</span> name <span class="operator">=</span> &quot;张靓颖&quot;);</span><br><span class="line"><span class="operator">+</span><span class="comment">-----------+---------------------+--------------------------------------------------------+--------+</span></span><br><span class="line"><span class="operator">|</span> id        <span class="operator">|</span> name                <span class="operator">|</span> link                                                   <span class="operator">|</span> singer <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-----------+---------------------+--------------------------------------------------------+--------+</span></span><br><span class="line"><span class="operator">|</span>    <span class="number">169794</span> <span class="operator">|</span> 天下无双            <span class="operator">|</span> http:<span class="operator">/</span><span class="operator">/</span>music<span class="number">.163</span>.com<span class="operator">/</span>song<span class="operator">/</span>media<span class="operator">/</span><span class="keyword">outer</span><span class="operator">/</span>url?id<span class="operator">=</span><span class="number">169794</span>    <span class="operator">|</span>  <span class="number">10561</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>    <span class="number">327089</span> <span class="operator">|</span> 画心                <span class="operator">|</span> http:<span class="operator">/</span><span class="operator">/</span>music<span class="number">.163</span>.com<span class="operator">/</span>song<span class="operator">/</span>media<span class="operator">/</span><span class="keyword">outer</span><span class="operator">/</span>url?id<span class="operator">=</span><span class="number">327089</span>    <span class="operator">|</span>  <span class="number">10561</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>    <span class="number">327163</span> <span class="operator">|</span> 我们说好的          <span class="operator">|</span> http:<span class="operator">/</span><span class="operator">/</span>music<span class="number">.163</span>.com<span class="operator">/</span>song<span class="operator">/</span>media<span class="operator">/</span><span class="keyword">outer</span><span class="operator">/</span>url?id<span class="operator">=</span><span class="number">327163</span>    <span class="operator">|</span>  <span class="number">10561</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>    <span class="number">327225</span> <span class="operator">|</span> 如果爱下去          <span class="operator">|</span> http:<span class="operator">/</span><span class="operator">/</span>music<span class="number">.163</span>.com<span class="operator">/</span>song<span class="operator">/</span>media<span class="operator">/</span><span class="keyword">outer</span><span class="operator">/</span>url?id<span class="operator">=</span><span class="number">327225</span>    <span class="operator">|</span>  <span class="number">10561</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>   <span class="number">5233037</span> <span class="operator">|</span> 另一个天堂          <span class="operator">|</span> http:<span class="operator">/</span><span class="operator">/</span>music<span class="number">.163</span>.com<span class="operator">/</span>song<span class="operator">/</span>media<span class="operator">/</span><span class="keyword">outer</span><span class="operator">/</span>url?id<span class="operator">=</span><span class="number">5233037</span>   <span class="operator">|</span>  <span class="number">10561</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>  <span class="number">31877130</span> <span class="operator">|</span> 饿狼传说 (Live)     <span class="operator">|</span> http:<span class="operator">/</span><span class="operator">/</span>music<span class="number">.163</span>.com<span class="operator">/</span>song<span class="operator">/</span>media<span class="operator">/</span><span class="keyword">outer</span><span class="operator">/</span>url?id<span class="operator">=</span><span class="number">31877130</span>  <span class="operator">|</span>  <span class="number">10561</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> <span class="number">431853688</span> <span class="operator">|</span> 我的梦 (Live)       <span class="operator">|</span> http:<span class="operator">/</span><span class="operator">/</span>music<span class="number">.163</span>.com<span class="operator">/</span>song<span class="operator">/</span>media<span class="operator">/</span><span class="keyword">outer</span><span class="operator">/</span>url?id<span class="operator">=</span><span class="number">431853688</span> <span class="operator">|</span>  <span class="number">10561</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-----------+---------------------+--------------------------------------------------------+--------+</span></span><br><span class="line"><span class="number">7</span> <span class="keyword">rows</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.25</span> sec)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>子查询可以嵌套，但出于效能考虑，不应该嵌套过多。</li>
+</ul>
+<h3 id="作为计算字段使用子查询"><a href="#作为计算字段使用子查询" class="headerlink" title="作为计算字段使用子查询"></a>作为计算字段使用子查询</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">SELECT</span> name,</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> (<span class="keyword">SELECT</span> <span class="built_in">COUNT</span>(<span class="operator">*</span>) <span class="keyword">FROM</span> songs <span class="keyword">WHERE</span> songs.singer <span class="operator">=</span> singer.id) <span class="keyword">AS</span> nums</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">FROM</span> singer <span class="keyword">WHERE</span> type <span class="keyword">IN</span></span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> (<span class="keyword">SELECT</span> id <span class="keyword">FROM</span> singer_type <span class="keyword">WHERE</span> type <span class="operator">=</span> &quot;华语男歌手&quot;)</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">ORDER</span> <span class="keyword">BY</span> name</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> LIMIT <span class="number">5</span>;</span><br><span class="line"><span class="operator">+</span><span class="comment">-----------------+------+</span></span><br><span class="line"><span class="operator">|</span> name            <span class="operator">|</span> nums <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-----------------+------+</span></span><br><span class="line"><span class="operator">|</span> “阿兰姐”        <span class="operator">|</span>   <span class="number">50</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> <span class="number">023</span> GC          <span class="operator">|</span>    <span class="number">0</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> A3              <span class="operator">|</span>   <span class="number">32</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> abduwali tohti  <span class="operator">|</span>    <span class="number">8</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> ABSDJHONG       <span class="operator">|</span>   <span class="number">22</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-----------------+------+</span></span><br><span class="line"><span class="number">5</span> <span class="keyword">rows</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.69</span> sec)</span><br></pre></td></tr></table></figure>
+
+<h2 id="联结表"><a href="#联结表" class="headerlink" title="联结表"></a>联结表</h2><blockquote>
+<p>联结是一种机制，用来在一条SELECT语句中关联表，因此，称为联结</p>
+</blockquote>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">--- 等值联结</span></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">SELECT</span> songs.name,link,singer.name <span class="keyword">FROM</span> songs,singer</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">WHERE</span> songs.singer <span class="operator">=</span> singer.id</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> LIMIT <span class="number">5</span>;</span><br><span class="line"><span class="operator">+</span><span class="comment">-----------------+----------------------------------------------------+--------+</span></span><br><span class="line"><span class="operator">|</span> name            <span class="operator">|</span> link                                               <span class="operator">|</span> name   <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-----------------+----------------------------------------------------+--------+</span></span><br><span class="line"><span class="operator">|</span> Happy Birth <span class="keyword">Day</span> <span class="operator">|</span> http:<span class="operator">/</span><span class="operator">/</span>music<span class="number">.163</span>.com<span class="operator">/</span>song<span class="operator">/</span>media<span class="operator">/</span><span class="keyword">outer</span><span class="operator">/</span>url?id<span class="operator">=</span><span class="number">59867</span> <span class="operator">|</span> 阿信   <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> 几年了          <span class="operator">|</span> http:<span class="operator">/</span><span class="operator">/</span>music<span class="number">.163</span>.com<span class="operator">/</span>song<span class="operator">/</span>media<span class="operator">/</span><span class="keyword">outer</span><span class="operator">/</span>url?id<span class="operator">=</span><span class="number">59870</span> <span class="operator">|</span> 阿杜   <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> Valentines <span class="keyword">Day</span> <span class="operator">|</span> http:<span class="operator">/</span><span class="operator">/</span>music<span class="number">.163</span>.com<span class="operator">/</span>song<span class="operator">/</span>media<span class="operator">/</span><span class="keyword">outer</span><span class="operator">/</span>url?id<span class="operator">=</span><span class="number">59875</span> <span class="operator">|</span> 阿杜   <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> 再唱一首        <span class="operator">|</span> http:<span class="operator">/</span><span class="operator">/</span>music<span class="number">.163</span>.com<span class="operator">/</span>song<span class="operator">/</span>media<span class="operator">/</span><span class="keyword">outer</span><span class="operator">/</span>url?id<span class="operator">=</span><span class="number">59877</span> <span class="operator">|</span> 阿杜   <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> 圣堂之门        <span class="operator">|</span> http:<span class="operator">/</span><span class="operator">/</span>music<span class="number">.163</span>.com<span class="operator">/</span>song<span class="operator">/</span>media<span class="operator">/</span><span class="keyword">outer</span><span class="operator">/</span>url?id<span class="operator">=</span><span class="number">59886</span> <span class="operator">|</span> 阿沁   <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-----------------+----------------------------------------------------+--------+</span></span><br><span class="line"><span class="number">5</span> <span class="keyword">rows</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.01</span> sec)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>创建表联结时的WGERE语句非常重要，他作为过滤条件，只包含那些匹配给定条件的行，没有联结条件则会返回要联结的表的笛卡尔积（叉联结）</li>
+<li>完全限定名：引用列可能出现歧义，这种情况应该使用<code>表名.列名</code>的完全限定名</li>
+</ul>
+<h3 id="内连接（inner-join）"><a href="#内连接（inner-join）" class="headerlink" title="内连接（inner-join）"></a>内连接（inner-join）</h3><p>上面的等值连接也叫内连接，可以显式声明联结类型</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">SELECT</span> songs.name, link, singer.name <span class="keyword">AS</span> singer</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">FROM</span> songs <span class="keyword">INNER</span> <span class="keyword">JOIN</span> singer <span class="keyword">ON</span></span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> songs.singer <span class="operator">=</span> singer.id</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> LIMIT <span class="number">5</span>;</span><br><span class="line"><span class="operator">+</span><span class="comment">-----------------+----------------------------------------------------+--------+</span></span><br><span class="line"><span class="operator">|</span> name            <span class="operator">|</span> link                                               <span class="operator">|</span> singer <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-----------------+----------------------------------------------------+--------+</span></span><br><span class="line"><span class="operator">|</span> Happy Birth <span class="keyword">Day</span> <span class="operator">|</span> http:<span class="operator">/</span><span class="operator">/</span>music<span class="number">.163</span>.com<span class="operator">/</span>song<span class="operator">/</span>media<span class="operator">/</span><span class="keyword">outer</span><span class="operator">/</span>url?id<span class="operator">=</span><span class="number">59867</span> <span class="operator">|</span> 阿信   <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> 几年了          <span class="operator">|</span> http:<span class="operator">/</span><span class="operator">/</span>music<span class="number">.163</span>.com<span class="operator">/</span>song<span class="operator">/</span>media<span class="operator">/</span><span class="keyword">outer</span><span class="operator">/</span>url?id<span class="operator">=</span><span class="number">59870</span> <span class="operator">|</span> 阿杜   <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> Valentines <span class="keyword">Day</span> <span class="operator">|</span> http:<span class="operator">/</span><span class="operator">/</span>music<span class="number">.163</span>.com<span class="operator">/</span>song<span class="operator">/</span>media<span class="operator">/</span><span class="keyword">outer</span><span class="operator">/</span>url?id<span class="operator">=</span><span class="number">59875</span> <span class="operator">|</span> 阿杜   <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> 再唱一首        <span class="operator">|</span> http:<span class="operator">/</span><span class="operator">/</span>music<span class="number">.163</span>.com<span class="operator">/</span>song<span class="operator">/</span>media<span class="operator">/</span><span class="keyword">outer</span><span class="operator">/</span>url?id<span class="operator">=</span><span class="number">59877</span> <span class="operator">|</span> 阿杜   <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> 圣堂之门        <span class="operator">|</span> http:<span class="operator">/</span><span class="operator">/</span>music<span class="number">.163</span>.com<span class="operator">/</span>song<span class="operator">/</span>media<span class="operator">/</span><span class="keyword">outer</span><span class="operator">/</span>url?id<span class="operator">=</span><span class="number">59886</span> <span class="operator">|</span> 阿沁   <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-----------------+----------------------------------------------------+--------+</span></span><br><span class="line"><span class="number">5</span> <span class="keyword">rows</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>SQL本身不限制联结表的数量，但许多DBMS有限制</li>
+<li>联结表越多，性能下降越厉害</li>
+<li>允许使用表别名(Oracle 不用 AS)</li>
+</ul>
+<h3 id="自联结（self-join）"><a href="#自联结（self-join）" class="headerlink" title="自联结（self-join）"></a>自联结（self-join）</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">SELECT</span> s1.name,s1.singer</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">FROM</span> songs <span class="keyword">AS</span> s1,songs <span class="keyword">AS</span> s2</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">WHERE</span> s1.singer <span class="operator">=</span> s2.singer <span class="keyword">AND</span> s2.name<span class="operator">=</span>&quot;光年之外&quot;;</span><br><span class="line"><span class="operator">+</span><span class="comment">-----------------------------+--------+</span></span><br><span class="line"><span class="operator">|</span> name                        <span class="operator">|</span> singer <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-----------------------------+--------+</span></span><br><span class="line"><span class="operator">|</span> 来自天堂的魔鬼              <span class="operator">|</span>   <span class="number">7763</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> 画 (Live Piano Session II)  <span class="operator">|</span>   <span class="number">7763</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> 光年之外                    <span class="operator">|</span>   <span class="number">7763</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> 断讯                        <span class="operator">|</span> <span class="number">916042</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> 光年之外                    <span class="operator">|</span> <span class="number">916042</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> 那个她                      <span class="operator">|</span> <span class="number">916042</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-----------------------------+--------+</span></span><br><span class="line"><span class="number">6</span> <span class="keyword">rows</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">4.53</span> sec)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>联结中的两张表是同一张表，必须使用别名区分。</li>
+<li>许多DBMS处理自联结比处理子查询快。</li>
+</ul>
+<h3 id="自然联结"><a href="#自然联结" class="headerlink" title="自然联结"></a>自然联结</h3><p>自然联结是一种特殊的等值联结（内联结），他要求两个关系中进行比较的分量必须是同名的属性组，并且在结果中把重复的属性列去掉，事实上，我们迄今为止建立的每个内联结都是自然联结，也很可能永远都不会用到不是自然联结的内联结。通常对一个表使用通配符（SELECT *）其他表使用明确的子集来完成。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">SELECT</span> s.<span class="operator">*</span> ,e.name</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">FROM</span> songs <span class="keyword">AS</span> s,singer <span class="keyword">AS</span> e</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">WHERE</span> s.singer <span class="operator">=</span> e.id <span class="keyword">AND</span> e.name <span class="operator">=</span> &quot;袁娅维&quot;;</span><br></pre></td></tr></table></figure>
+
+<h3 id="外联结"><a href="#外联结" class="headerlink" title="外联结"></a>外联结</h3><p>两个关系R和S在做自然连接时，他们在公共属性上值相等的元组构成新的关系，但是关系R中某些元组可能在关系S中不存在公共属性上值相等的元组，从而造成R中的这些元组被舍弃了，同样的S中的元组也有可能被舍弃，这些被舍弃的元组被称为 <strong>悬浮元组</strong></p>
+<p>如果把悬浮元组也保存到结果关系中，而在其他属性上填空值，这种联结叫做外联结，如果只保留左边关系R中的悬浮元组就叫做左外连接，如果只保留右边关系S中的悬浮元组就叫做右外连接。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 原来表的数据</span></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> r;</span><br><span class="line"><span class="operator">+</span><span class="comment">----+----+----+</span></span><br><span class="line"><span class="operator">|</span> A  <span class="operator">|</span> B  <span class="operator">|</span> C  <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">----+----+----+</span></span><br><span class="line"><span class="operator">|</span> a1 <span class="operator">|</span> b1 <span class="operator">|</span> <span class="number">5</span>  <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> a1 <span class="operator">|</span> b2 <span class="operator">|</span> <span class="number">6</span>  <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> a2 <span class="operator">|</span> b3 <span class="operator">|</span> <span class="number">8</span>  <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> a2 <span class="operator">|</span> b4 <span class="operator">|</span> <span class="number">12</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">----+----+----+</span></span><br><span class="line"><span class="number">4</span> <span class="keyword">rows</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br><span class="line"></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> s;</span><br><span class="line"><span class="operator">+</span><span class="comment">----+----+</span></span><br><span class="line"><span class="operator">|</span> B  <span class="operator">|</span> E  <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">----+----+</span></span><br><span class="line"><span class="operator">|</span> b1 <span class="operator">|</span> <span class="number">3</span>  <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> b2 <span class="operator">|</span> <span class="number">7</span>  <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> b3 <span class="operator">|</span> <span class="number">10</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> b3 <span class="operator">|</span> <span class="number">2</span>  <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> b5 <span class="operator">|</span> <span class="number">2</span>  <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">----+----+</span></span><br><span class="line"><span class="number">5</span> <span class="keyword">rows</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 左外连接</span></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">SELECT</span> r.<span class="operator">*</span>,s.<span class="operator">*</span></span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">FROM</span> r <span class="keyword">LEFT</span> <span class="keyword">OUTER</span> <span class="keyword">JOIN</span> s</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">ON</span> r.b <span class="operator">=</span> s.b;</span><br><span class="line"><span class="operator">+</span><span class="comment">----+----+----+------+------+</span></span><br><span class="line"><span class="operator">|</span> A  <span class="operator">|</span> B  <span class="operator">|</span> C  <span class="operator">|</span> B    <span class="operator">|</span> E    <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">----+----+----+------+------+</span></span><br><span class="line"><span class="operator">|</span> a1 <span class="operator">|</span> b1 <span class="operator">|</span> <span class="number">5</span>  <span class="operator">|</span> b1   <span class="operator">|</span> <span class="number">3</span>    <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> a1 <span class="operator">|</span> b2 <span class="operator">|</span> <span class="number">6</span>  <span class="operator">|</span> b2   <span class="operator">|</span> <span class="number">7</span>    <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> a2 <span class="operator">|</span> b3 <span class="operator">|</span> <span class="number">8</span>  <span class="operator">|</span> b3   <span class="operator">|</span> <span class="number">10</span>   <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> a2 <span class="operator">|</span> b3 <span class="operator">|</span> <span class="number">8</span>  <span class="operator">|</span> b3   <span class="operator">|</span> <span class="number">2</span>    <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> a2 <span class="operator">|</span> b4 <span class="operator">|</span> <span class="number">12</span> <span class="operator">|</span> <span class="keyword">NULL</span> <span class="operator">|</span> <span class="keyword">NULL</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">----+----+----+------+------+</span></span><br><span class="line"><span class="number">5</span> <span class="keyword">rows</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 右外联结</span></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">SELECT</span> r.<span class="operator">*</span>,s.<span class="operator">*</span></span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">FROM</span> r <span class="keyword">RIGHT</span> <span class="keyword">OUTER</span> <span class="keyword">JOIN</span> s</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">ON</span> r.b <span class="operator">=</span> s.b;</span><br><span class="line"><span class="operator">+</span><span class="comment">------+------+------+----+----+</span></span><br><span class="line"><span class="operator">|</span> A    <span class="operator">|</span> B    <span class="operator">|</span> C    <span class="operator">|</span> B  <span class="operator">|</span> E  <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">------+------+------+----+----+</span></span><br><span class="line"><span class="operator">|</span> a1   <span class="operator">|</span> b1   <span class="operator">|</span> <span class="number">5</span>    <span class="operator">|</span> b1 <span class="operator">|</span> <span class="number">3</span>  <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> a1   <span class="operator">|</span> b2   <span class="operator">|</span> <span class="number">6</span>    <span class="operator">|</span> b2 <span class="operator">|</span> <span class="number">7</span>  <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> a2   <span class="operator">|</span> b3   <span class="operator">|</span> <span class="number">8</span>    <span class="operator">|</span> b3 <span class="operator">|</span> <span class="number">10</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> a2   <span class="operator">|</span> b3   <span class="operator">|</span> <span class="number">8</span>    <span class="operator">|</span> b3 <span class="operator">|</span> <span class="number">2</span>  <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> <span class="keyword">NULL</span> <span class="operator">|</span> <span class="keyword">NULL</span> <span class="operator">|</span> <span class="keyword">NULL</span> <span class="operator">|</span> b5 <span class="operator">|</span> <span class="number">2</span>  <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">------+------+------+----+----+</span></span><br><span class="line"><span class="number">5</span> <span class="keyword">rows</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
+
+<p>还有一种全外联结（FULL OUTER JOIN）包含两个表中不相关的行，Access，MariaDB，MySQL，Open Office Base，SQLite不支持。</p>
+<h3 id="使用带聚集函数的联结"><a href="#使用带聚集函数的联结" class="headerlink" title="使用带聚集函数的联结"></a>使用带聚集函数的联结</h3><h2 id="组合查询-UNION"><a href="#组合查询-UNION" class="headerlink" title="组合查询 UNION"></a>组合查询 UNION</h2><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">SELECT</span> id, name <span class="keyword">from</span> singer <span class="keyword">where</span> name<span class="operator">=</span>&quot;阿沁&quot;</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">UNION</span></span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">SELECT</span> name, id <span class="keyword">FROM</span> singer <span class="keyword">WHERE</span> name<span class="operator">=</span>&quot;林俊呈&quot;;</span><br><span class="line"><span class="operator">+</span><span class="comment">-----------+----------+</span></span><br><span class="line"><span class="operator">|</span> id        <span class="operator">|</span> name     <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-----------+----------+</span></span><br><span class="line"><span class="operator">|</span> <span class="number">1872</span>      <span class="operator">|</span> 阿沁     <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> 林俊呈    <span class="operator">|</span> <span class="number">30107224</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-----------+----------+</span></span><br><span class="line"><span class="number">2</span> <span class="keyword">rows</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.07</span> sec)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>UNION 语句中必须包含相同的列，表达式或聚集函数（次序可以不同）</li>
+<li>列数据类型必须兼容</li>
+<li>只能使用一条ORDER BY 语句，位于最后一个select之后</li>
+<li>UNION会自动删除相同的行，如果不希望这样，可以使用 UNION ALL</li>
+</ul>
+<h2 id="插入数据-INSERT"><a href="#插入数据-INSERT" class="headerlink" title="插入数据 INSERT"></a>插入数据 INSERT</h2><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 不安全</span></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">INSERT</span> <span class="keyword">INTO</span> stu</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">VALUES</span>(</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> <span class="number">7</span>,</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> &quot;dapeng&quot;,</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> &quot;girl&quot;,</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> <span class="number">99</span>,</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> &quot;2019-10-9 10:11:21&quot;);</span><br><span class="line">Query OK, <span class="number">1</span> <span class="type">row</span> affected (<span class="number">0.09</span> sec)</span><br></pre></td></tr></table></figure>
+
+<p>应该给出列名（虽然更加麻烦），尤其是你只打算插入部分行时。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">INSERT</span> <span class="keyword">INTO</span> stu(id,</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span>                 name,</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span>                 sex,</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span>                 grade)</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">VALUES</span>(<span class="number">8</span>,</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span>        &quot;xiaowei&quot;,</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span>        &quot;girl&quot;,</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span>        <span class="number">99</span>);</span><br><span class="line">Query OK, <span class="number">1</span> <span class="type">row</span> affected (<span class="number">0.05</span> sec)</span><br></pre></td></tr></table></figure>
+
+<h3 id="插入检索出的数据"><a href="#插入检索出的数据" class="headerlink" title="插入检索出的数据"></a>插入检索出的数据</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">INSERT</span> <span class="keyword">INTO</span> stu(name,</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span>                 sex,</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span>                 grade,</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span>                 birthday)</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">SELECT</span> name,</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span>        sex,</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span>        grade,</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span>        birthday</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">FROM</span> stu <span class="keyword">WHERE</span> id <span class="operator">=</span> <span class="number">1</span>;</span><br><span class="line">Query OK, <span class="number">1</span> <span class="type">row</span> affected (<span class="number">1.67</span> sec)</span><br><span class="line">Records: <span class="number">1</span>  Duplicates: <span class="number">0</span>  Warnings: <span class="number">0</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>可以从本表中检索插入，也可以从其他表中检索插入。</li>
+</ul>
+<h3 id="从一个表复制到另一个表-SELECT-INTO"><a href="#从一个表复制到另一个表-SELECT-INTO" class="headerlink" title="从一个表复制到另一个表 SELECT INTO"></a>从一个表复制到另一个表 SELECT INTO</h3><ul>
+<li>DB2 不支持</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- MariaDB,MySQL,Oracle,PostgreSQL,SQLite</span></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">CREATE</span> <span class="keyword">TABLE</span> s_copy <span class="keyword">AS</span> <span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> s;</span><br><span class="line">Query OK, <span class="number">5</span> <span class="keyword">rows</span> affected (<span class="number">0.11</span> sec)</span><br><span class="line">Records: <span class="number">5</span>  Duplicates: <span class="number">0</span>  Warnings: <span class="number">0</span></span><br><span class="line"></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">show</span> tables;</span><br><span class="line"><span class="operator">+</span><span class="comment">----------------------+</span></span><br><span class="line"><span class="operator">|</span> Tables_in_sqlstudent <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">----------------------+</span></span><br><span class="line"><span class="operator">|</span> r                    <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> s                    <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> s_copy               <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> stu                  <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">----------------------+</span></span><br><span class="line"><span class="number">4</span> <span class="keyword">rows</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 其他DBMS</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">INTO</span> s_copy <span class="keyword">FROM</span> s;</span><br></pre></td></tr></table></figure>
+
+<h2 id="更新和删除数据"><a href="#更新和删除数据" class="headerlink" title="更新和删除数据"></a>更新和删除数据</h2><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">UPDATE</span> stu</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">SET</span> sex<span class="operator">=</span>&quot;boy&quot;,</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span>     birthday<span class="operator">=</span><span class="keyword">Null</span></span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">WHERE</span> name <span class="operator">=</span> &quot;dapeng&quot;;</span><br><span class="line">Query OK, <span class="number">1</span> <span class="type">row</span> affected (<span class="number">0.08</span> sec)</span><br><span class="line"><span class="keyword">Rows</span> matched: <span class="number">1</span>  Changed: <span class="number">1</span>  Warnings: <span class="number">0</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>可以只写一条UPDATE语句更新多列数据</li>
+<li>部分DBMS支持FROM语法，把别的表中的数据更新到这张表里</li>
+<li>不写WHERE语句会更新所有行</li>
+<li>UPDATE允许使用子查询</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">DELETE</span> <span class="keyword">FROM</span> stu <span class="keyword">WHERE</span> id<span class="operator">=</span><span class="number">2</span>;</span><br><span class="line">Query OK, <span class="number">1</span> <span class="type">row</span> affected (<span class="number">0.04</span> sec)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>不写WHERE语句会删除所有数据</li>
+<li>DELETE不需要列名或通配符，应为它删除的是整个行</li>
+<li>如果想删除所有行，应该使用TRUNCATE TABLE，它更快，所以无论何时，使用DELETE时记得加WHERE</li>
+</ul>
+<h2 id="创建和操纵表"><a href="#创建和操纵表" class="headerlink" title="创建和操纵表"></a>创建和操纵表</h2><p>删除表</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">DROP</span> <span class="keyword">TABLE</span> s_copy;</span><br><span class="line">Query OK, <span class="number">0</span> <span class="keyword">rows</span> affected (<span class="number">0.07</span> sec)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>没提示确认</li>
+</ul>
+<p>创建表</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">CREATE</span> <span class="keyword">TABLE</span> Products(</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> id <span class="type">int</span>(<span class="number">255</span>) <span class="keyword">NOT</span> <span class="keyword">NULL</span>,</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> name <span class="type">VARCHAR</span>(<span class="number">100</span>) <span class="keyword">NULL</span></span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> );</span><br><span class="line">Query OK, <span class="number">0</span> <span class="keyword">rows</span> affected (<span class="number">0.08</span> sec)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>不同DBMS的表创建语句有差异</li>
+<li>创建新表时，指定的表名必须不存在</li>
+<li>创建表时字段允许为空则指定NULL，否则，如果要求插入时必须给出值，则指定为NOT NULL</li>
+<li><code>NULL</code>不同于<code>&#39;&#39;</code>,前者是没有值，后者是空字符串</li>
+<li>不指定时大部分DBMS默认为NULL，但DB2不指定会报错</li>
+<li>允许NULL值的列不允许作为主键</li>
+<li>DEFAULT 用来指定默认值，常用于时间或时间戳列</li>
+</ul>
+<p>获取系统日期</p>
+<table>
+<thead>
+<tr>
+<th>DBMS</th>
+<th>函数</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Access</td>
+<td>NOW()</td>
+</tr>
+<tr>
+<td>DB2</td>
+<td>CURRENT_DATE</td>
+</tr>
+<tr>
+<td>MySQL</td>
+<td>CURRENT_TIMESTAMP</td>
+</tr>
+<tr>
+<td>Oracle</td>
+<td>SYSDATE</td>
+</tr>
+<tr>
+<td>PostgreSQL</td>
+<td>CURRENT_DATE</td>
+</tr>
+<tr>
+<td>SQL Server</td>
+<td>GETDATE()</td>
+</tr>
+<tr>
+<td>SQLite</td>
+<td>date(‘now’)</td>
+</tr>
+</tbody></table>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> <span class="keyword">User</span></span><br><span class="line">(</span><br><span class="line">    id      <span class="type">INT</span>(<span class="number">255</span>)        <span class="keyword">NOT</span> <span class="keyword">NULL</span>,</span><br><span class="line">    name    <span class="type">VARCHAR</span>(<span class="number">255</span>)    <span class="keyword">NOT</span> <span class="keyword">NULL</span>,</span><br><span class="line">    create_time <span class="type">timestamp</span>   <span class="keyword">DEFAULT</span> <span class="built_in">CURRENT_TIMESTAMP</span></span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<p>更新表 ALTER TABLE</p>
+<ul>
+<li>一般不要在表中包含数据时更新表</li>
+<li>所有DBMS都允许怎加列，不过对所增加列的数据类型（NULL和DEFAULT的使用）有限制</li>
+<li>许多DBMS不允许删除或更改列</li>
+<li>许多DBMS允许重命名列</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 增加列</span></span><br><span class="line"><span class="keyword">ALTER</span> <span class="keyword">TABLE</span> <span class="keyword">User</span> <span class="keyword">ADD</span> phone <span class="type">CHAR</span>(<span class="number">20</span>);</span><br><span class="line"></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">DESCRIBE</span> <span class="keyword">User</span>;</span><br><span class="line"><span class="operator">+</span><span class="comment">-------------+--------------+------+-----+-------------------+-------------------+</span></span><br><span class="line"><span class="operator">|</span> Field       <span class="operator">|</span> Type         <span class="operator">|</span> <span class="keyword">Null</span> <span class="operator">|</span> Key <span class="operator">|</span> <span class="keyword">Default</span>           <span class="operator">|</span> Extra             <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-------------+--------------+------+-----+-------------------+-------------------+</span></span><br><span class="line"><span class="operator">|</span> id          <span class="operator">|</span> <span class="type">int</span>(<span class="number">255</span>)     <span class="operator">|</span> <span class="keyword">NO</span>   <span class="operator">|</span>     <span class="operator">|</span> <span class="keyword">NULL</span>              <span class="operator">|</span>                   <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> name        <span class="operator">|</span> <span class="type">varchar</span>(<span class="number">255</span>) <span class="operator">|</span> <span class="keyword">NO</span>   <span class="operator">|</span>     <span class="operator">|</span> <span class="keyword">NULL</span>              <span class="operator">|</span>                   <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> create_time <span class="operator">|</span> <span class="type">timestamp</span>    <span class="operator">|</span> YES  <span class="operator">|</span>     <span class="operator">|</span> <span class="built_in">CURRENT_TIMESTAMP</span> <span class="operator">|</span> DEFAULT_GENERATED <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> phone       <span class="operator">|</span> <span class="type">char</span>(<span class="number">20</span>)     <span class="operator">|</span> YES  <span class="operator">|</span>     <span class="operator">|</span> <span class="keyword">NULL</span>              <span class="operator">|</span>                   <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-------------+--------------+------+-----+-------------------+-------------------+</span></span><br><span class="line"><span class="number">4</span> <span class="keyword">rows</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 删除列</span></span><br><span class="line"><span class="keyword">ALTER</span> <span class="keyword">TABLE</span> <span class="keyword">User</span> <span class="keyword">DROP</span> <span class="keyword">COLUMN</span> phone;</span><br></pre></td></tr></table></figure>
+
+<h2 id="视图"><a href="#视图" class="headerlink" title="视图"></a>视图</h2><p>视图是一张虚拟的表，不包含数据，只包含使用时动态检索数据的查询。</p>
+<p>为什么使用视图：</p>
+<ul>
+<li>重用SQL语句</li>
+<li>简化复杂的SQL操作</li>
+<li>只是用表的一部分而不是整个表</li>
+<li>保护数据，可以授予用户访问表的特定部分的权限，而不是整个表的访问权限</li>
+<li>更改数据格式和表示</li>
+</ul>
+<p>性能问题</p>
+<p>视图不包含数据，每次使用视图时，都必须处理查询执行时需要的所有检索，如果使用多个联结和过滤创立了复杂的视图或嵌套了视图，性能可能会下降的很厉害</p>
+<p>视图的规则和限制</p>
+<ul>
+<li>必须拥有唯一命名</li>
+<li>创建视图的数目没有限制</li>
+<li>必须拥有足够的访问权限</li>
+<li>可以嵌套，嵌套层数因DBMS而异</li>
+<li>许多DBMS禁止使用ORDER BY</li>
+<li>有些DBMS要求对所返回的所有列命名，如果是计算字段，需要使用别名</li>
+<li>有些DBMS把视图作为只读查询</li>
+<li>有些DBMS允许创建这样的视图：不能进行导致行不再属于视图的插入或更新</li>
+</ul>
+<p>创建视图 CREATE VIEW</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">VIEW</span> song_singer <span class="keyword">AS</span></span><br><span class="line"><span class="keyword">SELECT</span> songs.name <span class="keyword">AS</span> song_name,</span><br><span class="line">songs.link,</span><br><span class="line">singer.name <span class="keyword">AS</span> singer_name,</span><br><span class="line">singer_type.type</span><br><span class="line"><span class="keyword">FROM</span> songs,singer,singer_type</span><br><span class="line"><span class="keyword">WHERE</span> songs.singer <span class="operator">=</span> singer.id <span class="keyword">AND</span></span><br><span class="line">singer.type <span class="operator">=</span> singer_type.id;</span><br></pre></td></tr></table></figure>
+
+<p>创建视图时可以使用格式化语句或计算字段</p>
+<p>使用视图</p>
+<p>SELECT语句中的所有约束条件在视图中都适用。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">SELECT</span> <span class="operator">*</span> <span class="keyword">FROM</span> song_singer <span class="keyword">WHERE</span> singer_name <span class="operator">=</span> &quot;薛之谦&quot;;</span><br></pre></td></tr></table></figure>
+
+<h2 id="存储过程"><a href="#存储过程" class="headerlink" title="存储过程"></a>存储过程</h2><p>存储过程可以理解为保存一条或多条语句，将其视为批文件，也可以看作是编程语言中的函数</p>
+<p>为什么使用存储过程</p>
+<ul>
+<li>把处理分装在一个易用的单元中，可以简化操作</li>
+<li>由于不要求反复建立一系列处理步骤，从而保证了数据的一致性</li>
+<li>简化对变动的管理存储过程通常以编译过的形式存储，所以DBMS处理命令的工作较少，提高了性能</li>
+<li>存在一些只能用在单个请求中的SQL元素和特性，存储过程可以使用他们编写功能更强，更灵活的代码</li>
+<li>存在一些只能用在单个请求中的SQL元素和特性，存储过程可以使用他们编写更强更灵活的代码。</li>
+</ul>
+<p>缺点</p>
+<ul>
+<li>不同DBMS的存储过程语法不同，可移植性差</li>
+<li>编写复杂</li>
+</ul>
+<p><a target="_blank" rel="noopener" href="https://www.runoob.com/w3cnote/mysql-stored-procedure.html">参考</a></p>
+
+      
+    </div>
+
+  </div>
+
+  <div class="article-footer">
+    <div class="article-meta pull-left">
+
+    
+      
+
+    <span class="post-categories">
+      <i class="icon-categories"></i>
+        <a href="/categories/数据库/">数据库</a>
+    </span>
+    
+
+    
+    
+
+    <span class="post-tags">
+      <i class="icon-tags"></i>
+        <a href="/tags/数据库/">数据库</a>
+    </span>
+    
+
+    </div>
+
+    
+  </div>
+</article>
+
+  
+
+
+
+
+
+
+
+
+
+    </main>
+
+    <footer class="site-footer">
+  <p class="site-info">
+    Proudly powered by <a href="https://hexo.io/" target="_blank">Hexo</a> and
+    Theme by <a href="https://github.com/520MianXiangDuiXiang520/Hacker" target="_blank">Hacker</a>
+    </br>
+    
+    &copy; 2024 Junebao
+    
+  </p>
+</footer>
+    
+    
+  </div>
+</div>
+</body>
+</html>

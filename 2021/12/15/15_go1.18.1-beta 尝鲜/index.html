@@ -1,0 +1,271 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Go 1.18.1 Beta 尝鲜 | Junebao</title>
+
+  
+  <meta name="author" content="Junebao">
+  
+
+  
+  <meta name="description" content="昨天，go 终于发布了 1.18 的 beta 版本, 带来了大家期待已久的泛型，抓紧时间康康能不能赶上热乎的。">
+  
+
+  
+  
+  <meta name="keywords" content="go">
+  
+
+  <meta id="viewport" name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  <meta property="og:title" content="Go 1.18.1 Beta 尝鲜"/>
+
+  <meta property="og:site_name" content="Junebao"/>
+
+  
+  <meta property="og:image" content="/favicon.ico"/>
+  
+
+  <link href="/favicon.ico" rel="icon">
+  <link rel="alternate" href="/atom.xml" title="Junebao" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+<div class="blog">
+  <div class="content">
+
+    <header>
+  <div class="site-branding">
+    <h1 class="site-title">
+      <a href="/">Junebao</a>
+    </h1>
+    <p class="site-description"></p>
+  </div>
+  <nav class="site-navigation">
+    <ul>
+      
+        
+          <li><a class="menu-uncover-a" href="/">主页</li>
+        
+      
+        
+          <li><a class="menu-uncover-a" href="/archives">归档</li>
+        
+      
+        
+          <li><a class="menu-uncover-a" href="/tags">标签</li>
+        
+      
+        
+          <li><a class="menu-uncover-a" href="/about">关于</li>
+        
+      
+    </ul>
+  </nav>
+</header>
+
+    <main class="site-main posts-loop">
+    <article>
+
+  
+    
+    <h3 class="article-title"><span>Go 1.18.1 Beta 尝鲜</span></h3>
+    
+  
+
+  <div class="article-top-meta">
+    <span class="posted-on">
+      <a href="/2021/12/15/15_go1.18.1-beta 尝鲜/" rel="bookmark">
+        <time class="entry-date published" datetime="2021-12-15T04:55:15.000Z">
+          2021-12-15
+        </time>
+      </a>
+    </span>
+  </div>
+
+
+  
+
+  <div class="article-content">
+    <div class="entry">
+      
+        <p>昨天，go 终于发布了 1.18 的 beta 版本, 带来了大家期待已久的泛型，抓紧时间康康能不能赶上热乎的。</p>
+<span id="more"></span>
+
+<p><a target="_blank" rel="noopener" href="https://go.dev/dl/#go1.18beta1">下载地址</a></p>
+<p>根据社区昨天发的 <a target="_blank" rel="noopener" href="https://go.dev/blog/go1.18beta1">Go 1.18 Beta 1 is available, with generics</a> 这次版本更新主要带来的新功能有：</p>
+<ul>
+<li>泛型</li>
+<li>模糊测试( <a target="_blank" rel="noopener" href="https://go.dev/blog/fuzz-beta">fuzzing-based tests</a>)</li>
+<li>workspace mode</li>
+<li>arm64 和 PPC64 也增加了基于寄存器的调用规约</li>
+<li>增加了一个 <code>go version -m</code> 可以记录构建细节</li>
+<li>其他，参见 <a target="_blank" rel="noopener" href="https://tip.golang.org/doc/go1.18">draft release notes for Go 1.18</a></li>
+</ul>
+<h2 id="泛型"><a href="#泛型" class="headerlink" title="泛型"></a>泛型</h2><p>在没有泛型之前，假设我们需要求两个数的和，根据运算数的类型，可能需要写很多个函数，如：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">SumInt64</span><span class="params">(a, b <span class="type">int64</span>)</span></span> <span class="type">int64</span> &#123;<span class="keyword">return</span> a + b&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">SumFloat64</span><span class="params">(a, b <span class="type">int64</span>)</span></span> <span class="type">float64</span> &#123;<span class="keyword">return</span> a + b&#125;</span><br></pre></td></tr></table></figure>
+
+<p>有了泛型之后就可以这样写了：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Sum2</span>[<span class="title">V</span> <span class="title">int</span> | <span class="title">int64</span> | <span class="title">float64</span> | <span class="title">int32</span> | <span class="title">float32</span>]<span class="params">(a, b V)</span></span> V &#123;</span><br><span class="line">	<span class="keyword">return</span> a + b</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面的代码在 <code>[]</code> 中声明了一个泛型 V 它支持 <code>int, int64, int32, float32, float64</code> 五种类型，函数有两个 V 类型的参数 a 和 b 此外函数返回值也是 V 类型</p>
+<p>我还是挺好奇如果传入的参数不是这五种会报什么错：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//go:build go1.18</span></span><br><span class="line"><span class="comment">// +build go1.18</span></span><br><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> <span class="string">&quot;fmt&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Sum2</span>[<span class="title">V</span> <span class="title">int64</span> | <span class="title">float64</span> | <span class="title">int32</span> | <span class="title">float32</span>]<span class="params">(a, b V)</span></span> V &#123;</span><br><span class="line">	<span class="keyword">return</span> a + b</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	fmt.Println(Sum2[<span class="type">int</span>](<span class="number">1</span>, <span class="number">2</span>))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>编译时报错：</p>
+<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># go1.18.1-beta/1.18-beta/generic/generic</span><br><span class="line">.\main.go:20:21: int does not implement int64|float64|int32|float32</span><br></pre></td></tr></table></figure>
+
+<p>注意，在调用 <code>Sum2</code> 时，我们使用 <code>[]</code> 显示地制定了 <code>V</code> 是 <code>int</code> 类型，在编译器可以推断类型时，这个是可以省略的，也就是可以写作</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	fmt.Println(Sum2(<span class="number">1</span>, <span class="number">2</span>))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>但这并不是一直有用的，比如你要调用一个没有参数的泛型函数时，如：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">PI</span>[<span class="title">V</span> <span class="title">int</span> | <span class="title">float64</span>]<span class="params">()</span></span> V &#123;</span><br><span class="line">   <span class="keyword">var</span> v V</span><br><span class="line">   v = <span class="number">10.0</span></span><br><span class="line">   <span class="keyword">return</span> v</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	<span class="comment">// fmt.Println(PI())  // .\main.go:28:16: cannot infer V </span></span><br><span class="line">    fmt.Println(PI[<span class="type">float64</span>]()) <span class="comment">// 10</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>此外，都知道 go map 的 key 要求是可比较的类型，因此，go 新增了一个关键字 <code>comparable</code> 表明泛型是一个可比较类型, 当泛型参数作为 map 的 key 时，它必须是可比较的。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//go:build go1.18</span></span><br><span class="line"><span class="comment">// +build go1.18</span></span><br><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> <span class="string">&quot;fmt&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Sum</span>[<span class="title">K</span> <span class="title">comparable</span>, <span class="title">V</span> <span class="title">int64</span> | <span class="title">float64</span>]<span class="params">(m <span class="keyword">map</span>[K]V)</span></span> V &#123;</span><br><span class="line">	<span class="keyword">var</span> sum V</span><br><span class="line">	<span class="keyword">for</span> k, v := <span class="keyword">range</span> m &#123;</span><br><span class="line">		sum += v</span><br><span class="line">		fmt.Println(k)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> sum</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	fmt.Println(Sum(<span class="keyword">map</span>[<span class="type">int64</span>]<span class="type">float64</span>&#123;<span class="number">1</span>: <span class="number">2.3</span>, <span class="number">2</span>: <span class="number">3.3</span>&#125;))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>是不是觉得每次  <code>int | int64 | float64 | int32 | float32</code> 写太麻烦了，确实，为此 go1.18 提供了泛型接口，你可以像定义接口一样定义一个泛型类型，就像：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Number <span class="keyword">interface</span> &#123;</span><br><span class="line">    <span class="type">int</span> | <span class="type">int8</span> | <span class="type">int16</span> | <span class="type">int32</span> | <span class="type">int64</span> | <span class="type">float32</span> | <span class="type">float64</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在这之后，你就可以使用 <code>Number</code> 来代替这一长串了</p>
+<h2 id="模糊测试"><a href="#模糊测试" class="headerlink" title="模糊测试"></a>模糊测试</h2><blockquote>
+<p><strong>模糊测试</strong> （fuzz testing, fuzzing）是一种<a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/%E8%BD%AF%E4%BB%B6%E6%B5%8B%E8%AF%95">软件测试</a>技术。其核心思想是将自动或半自动生成的随机数据输入到一个<a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%A8%8B%E5%BA%8F">程序</a>中，并监视程序异常，如崩溃，<a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/%E6%96%B7%E8%A8%80_(%E7%A8%8B%E5%BC%8F)">断言</a>（assertion）失败，以发现可能的程序错误，比如内存泄漏。模糊测试常常用于检测软件或计算机系统的安全漏洞。</p>
+<p>—— <a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/%E6%A8%A1%E7%B3%8A%E6%B5%8B%E8%AF%95">wikipedia 模糊测试</a></p>
+</blockquote>
+<p>可以看看官网的这个例子</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">FuzzHex</span><span class="params">(f *testing.F)</span></span> &#123;</span><br><span class="line">    <span class="keyword">for</span> _, seed := <span class="keyword">range</span> [][]<span class="type">byte</span>&#123;&#123;&#125;, &#123;<span class="number">0</span>&#125;, &#123;<span class="number">9</span>&#125;, &#123;<span class="number">0xa</span>&#125;, &#123;<span class="number">0xf</span>&#125;, &#123;<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>&#125;&#125; &#123;</span><br><span class="line">        f.Add(seed)</span><br><span class="line">    &#125;</span><br><span class="line">    f.Fuzz(<span class="function"><span class="keyword">func</span><span class="params">(t *testing.T, in []<span class="type">byte</span>)</span></span> &#123;</span><br><span class="line">        enc := hex.EncodeToString(in)</span><br><span class="line">        out, err := hex.DecodeString(enc)</span><br><span class="line">        <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">            t.Fatalf(<span class="string">&quot;%v: decode: %v&quot;</span>, in, err)</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> !bytes.Equal(in, out) &#123;</span><br><span class="line">            t.Fatalf(<span class="string">&quot;%v: not equal after round trip: %v&quot;</span>, in, out)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>运行 <code>go test -fuzz=Fuzz</code> 即可进行模糊测试，用法和普通测试差不多，如果有需要请移步<a target="_blank" rel="noopener" href="https://pkg.go.dev/testing@master#hdr-Fuzzing">官方文档</a></p>
+<h2 id="workspace-mode"><a href="#workspace-mode" class="headerlink" title="workspace mode"></a>workspace mode</h2><p>这是非常爽的一个功能，想想这样一个场景，为了方便测试，你需要要改某一个功能（有时可能只是一个数值），但这个功能是一个单独的模块，通过 mod 引入，所以你下载了这个包，并用 <code>replace</code> 将其替换成了本地的路径，就像：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">module go1.18.1-beta</span><br><span class="line"></span><br><span class="line">go 1.18</span><br><span class="line"></span><br><span class="line">replace (</span><br><span class="line">	github.com/json-iterator/go =&gt; /usr/bin/go/json-iterator/go</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>然后你就可以开心的改本地的模块了，但问题在于你每次提交代码时都需要回滚改过的 <code>go.mod</code> 否则大家就都用不了了……</p>
+<p>workspace mode 就是解决了这样的问题，它引入了一个 <code>go.work</code> 文件，你可以在项目目录下执行 <code>go work init .</code> 来生成它，需要注意的是 workspace mode 只能用在 goMod 中，所以目录下必须有 <code>go.mod</code> 才能生成 <code>go.work</code>, 刚生成的文件内容类似：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">go 1.18</span><br><span class="line"></span><br><span class="line">use ./.</span><br></pre></td></tr></table></figure>
+
+<p>在 <code>go.work</code> 中我们可以使用 <code>replace</code>:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">go 1.18</span><br><span class="line"></span><br><span class="line">use ./.</span><br><span class="line"></span><br><span class="line">replace (</span><br><span class="line">	github.com/json-iterator/go =&gt; /usr/bin/go/json-iterator/go</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>go 会优先选择 <code>go.work</code> 中的模块，这样你把 <code>go.work</code> 加入 <code>.gitignore</code> 就可以舒服地改代码了</p>
+<p>再看看上面的文件，事实上，在提案上，只有三个元素：</p>
+<blockquote>
+<p>The <code>go.work</code> file has three directives: the <code>go</code> directive, the <code>directory</code> directive, and the <code>replace</code> directive.</p>
+</blockquote>
+<p>在 beta 版中， <code>directory</code> 被改成了 <code>use</code>, 这三个元素的作用是：</p>
+<ul>
+<li><code>go</code>: 指明一个 go 版本</li>
+<li><code>use</code>:  将包含<code>go.mod</code>文件的目录的绝对或相对路径作为参数。路径的语法与<code>replace</code>指令中的目录替换相同。路径必须是包含<code>go.mod</code>文件的模块目录。<code>go.work</code>文件必须至少包含一个<code>use</code>指令。</li>
+</ul>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">use (</span><br><span class="line">    ./tools <span class="comment">// golang.org/x/tools</span></span><br><span class="line">    ./mod   <span class="comment">// golang.org/x/mod</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>replace</code>: 与 go mod 中的一样</li>
+</ul>
+<p>可以简单的理解为 <code>go.work</code> 声明了一个工作目录，这个目录下的成员由 <code>use</code> 声明，在工作目录下执行构建时，会优先使用工作目录下的组件。</p>
+<p>看这个例子</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> ~/project/go-beta/work</span><br><span class="line"><span class="built_in">mkdir</span> a b c</span><br><span class="line"><span class="built_in">cd</span> a</span><br><span class="line">go mod init github.com/520MianXiangDuiXiang520/a</span><br><span class="line"><span class="built_in">cd</span> ../b</span><br><span class="line">go mod init github.com/520MianXiangDuiXiang520/b</span><br><span class="line"><span class="built_in">cd</span> ../c</span><br><span class="line">go mod init c</span><br><span class="line"><span class="built_in">cd</span> ..</span><br><span class="line">go mod init work</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>当 work 引用 a b 时，由于这两个项目在 github 上不存在，所以之前只能使用 <code>replace</code>:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">module work</span><br><span class="line"></span><br><span class="line"><span class="keyword">go</span> <span class="number">1.18</span></span><br><span class="line"></span><br><span class="line">replace (</span><br><span class="line">	github.com/<span class="number">520</span>MianXiangDuiXiang520/a =&gt; ./a</span><br><span class="line">	github.com/<span class="number">520</span>MianXiangDuiXiang520/b =&gt; ./b</span><br><span class="line">	c =&gt; ./c</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">require (</span><br><span class="line">	github.com/<span class="number">520</span>MianXiangDuiXiang520/a v0<span class="number">.0</span><span class="number">.0</span><span class="number">-00010101000000</span><span class="number">-000000000000</span></span><br><span class="line">	github.com/<span class="number">520</span>MianXiangDuiXiang520/b v0<span class="number">.0</span><span class="number">.0</span><span class="number">-00010101000000</span><span class="number">-000000000000</span></span><br><span class="line">	c v0<span class="number">.0</span><span class="number">.0</span><span class="number">-00010101000000</span><span class="number">-000000000000</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>使用 workspace mode 后：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> ~/project/go-beta/work</span><br><span class="line">go work init . ./a ./b ./c</span><br></pre></td></tr></table></figure>
+
+<p>go mod 中可以只写:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">module work</span><br><span class="line"></span><br><span class="line"><span class="keyword">go</span> <span class="number">1.18</span></span><br></pre></td></tr></table></figure>
+
+<p>因为他们在同一个工作目录下</p>
+<h2 id="基于寄存器的调用规约"><a href="#基于寄存器的调用规约" class="headerlink" title="基于寄存器的调用规约"></a>基于寄存器的调用规约</h2><p>在 go 1.17 时就针对 <code>X86-64</code> 的处理器增加了这个，据说函数调用性能能提斯 20%，现在拓展到了 arm64 和 PPC64 但我没有这种处理器的电脑，不过可以对比一下旧版的函数调用方式：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">demo</span><span class="params">(a <span class="type">int64</span>, b <span class="type">int32</span>, c <span class="type">int16</span>, d <span class="type">int8</span>)</span></span> (<span class="type">int64</span>, <span class="type">int32</span>, <span class="type">int16</span>, <span class="type">int8</span>) &#123;</span><br><span class="line">	a += <span class="number">111</span></span><br><span class="line">	b += <span class="number">222</span></span><br><span class="line">	c += <span class="number">333</span></span><br><span class="line">	d += <span class="number">89</span></span><br><span class="line">	<span class="keyword">return</span> a, b, c, d</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	demo(<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在 go 1.14 的环境下，将上面的代码编译并输出汇编代码如下：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">go build -gcflags=<span class="string">&quot;-l -S&quot;</span> main.go</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight sas"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&quot;&quot;</span>.demo STEXT nosplit size=55 args=0x20 locals=0x0</span><br><span class="line">        0x0000 00000 (E:go汇编\01.go:3)  TEXT    <span class="string">&quot;&quot;</span>.demo(SB), NOSPLIT|ABIInternal, $0-32</span><br><span class="line">        0x0000 00000 (E:go汇编\01.go:3)  PCDATA  $0, $-2</span><br><span class="line">        0x0000 00000 (E:go汇编\01.go:3)  PCDATA  $1, $-2</span><br><span class="line">        0x0000 00000 (E:go汇编\01.go:3)  FUNCDATA        $0, gclocals·33cdeccccebe80329f1fdbee7f5874cb(SB)</span><br><span class="line">        0x0000 00000 (E:go汇编\01.go:3)  FUNCDATA        $1, gclocals·33cdeccccebe80329f1fdbee7f5874cb(SB)</span><br><span class="line">        0x0000 00000 (E:go汇编\01.go:3)  FUNCDATA        $2, gclocals·33cdeccccebe80329f1fdbee7f5874cb(SB)</span><br><span class="line">        0x0000 00000 (E:go汇编\01.go:4)  PCDATA  $0, $0</span><br><span class="line">        0x0000 00000 (E:go汇编\01.go:4)  PCDATA  $1, $0</span><br><span class="line">        0x0000 00000 (E:go汇编\01.go:4)  MOVQ    <span class="string">&quot;&quot;</span>.a+8(SP), AX</span><br><span class="line">        0x0005 00005 (E:go汇编\01.go:4)  ADDQ    $111, AX</span><br><span class="line">        0x0009 00009 (E:go汇编\01.go:8)  MOVQ    AX, <span class="string">&quot;&quot;</span>.~r4+24(SP)</span><br><span class="line">        0x000e 00014 (E:go汇编\01.go:5)  MOVL    <span class="string">&quot;&quot;</span>.b+16(SP), AX</span><br><span class="line">        0x0012 00018 (E:\桌面文件\笔记\Note\g o\go汇编\01.go:5)  ADDL    $222, AX</span><br><span class="line">        0x0017 00023 (E:go汇编\01.go:8)  MOVL    AX, <span class="string">&quot;&quot;</span>.~r5+32(SP)</span><br><span class="line">        0x001b 00027 (E:go汇编\01.go:6)  MOVWLZX <span class="string">&quot;&quot;</span>.c+20(SP), AX</span><br><span class="line">        0x0020 00032 (E:go汇编\01.go:6)  ADDL    $333, AX</span><br><span class="line">        0x0025 00037 (E:go汇编\01.go:8)  MOVW    AX, <span class="string">&quot;&quot;</span>.~r6+36(SP)</span><br><span class="line">        0x002a 00042 (E:go汇编\01.go:7)  MOVBLZX <span class="string">&quot;&quot;</span>.d+22(SP), AX</span><br><span class="line">        0x002f 00047 (E:go汇编\01.go:7)  ADDL    $89, AX</span><br><span class="line">        0x0032 00050 (E:go汇编\01.go:8)  MOVB    AL, <span class="string">&quot;&quot;</span>.~r7+38(SP)</span><br><span class="line">        0x0036 00054 (E:go汇编\01.go:8)  RET</span><br><span class="line">        0x0000 48 8b 44 24 08 48 83 c0 6f 48 89 44 24 18 8b 44  H.D$.H..oH.D$..D</span><br><span class="line">        0x0010 24 10 05 de 00 00 00 89 44 24 20 0f b7 44 24 14  $.......D$ ..D$.</span><br><span class="line">        0x0020 05 4d 01 00 00 66 89 44 24 24 0f b6 44 24 16 83  .M...f.D$$..D$..</span><br><span class="line">        0x0030 c0 59 88 44 24 26 c3                             .Y.D$&amp;.</span><br></pre></td></tr></table></figure>
+
+<p>1.18 编译结果如下：</p>
+<figure class="highlight sas"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"># command-line-arguments</span><br><span class="line"><span class="string">&quot;&quot;</span>.demo STEXT nosplit size=20 args=0x10 locals=0x0 funcid=0x0 align=0x0</span><br><span class="line">        0x0000 00000 (E:\<span class="keyword">add</span>.go:3)      TEXT    <span class="string">&quot;&quot;</span>.demo(SB), NOSPLIT|ABIInternal, $0-16</span><br><span class="line">        0x0000 00000 (E:\<span class="keyword">add</span>.go:3)      FUNCDATA        $0, gclocals·33cdeccccebe80329f1fdbee7f5874cb(SB)</span><br><span class="line">        0x0000 00000 (E:\<span class="keyword">add</span>.go:3)      FUNCDATA        $1, gclocals·33cdeccccebe80329f1fdbee7f5874cb(SB)</span><br><span class="line">        0x0000 00000 (E:\<span class="keyword">add</span>.go:3)      FUNCDATA        $5, <span class="string">&quot;&quot;</span>.demo.arginfo1(SB)</span><br><span class="line">        0x0000 00000 (E:\<span class="keyword">add</span>.go:3)      FUNCDATA        $6, <span class="string">&quot;&quot;</span>.demo.argliveinfo(SB)</span><br><span class="line">        0x0000 00000 (E:\<span class="keyword">add</span>.go:3)      PCDATA  $3, $1</span><br><span class="line">        0x0000 00000 (E:\<span class="keyword">add</span>.go:4)      ADDQ    $111, AX</span><br><span class="line">        0x0004 00004 (E:\<span class="keyword">add</span>.go:5)      ADDL    $222, BX</span><br><span class="line">        0x000a 00010 (E:\<span class="keyword">add</span>.go:6)      ADDL    $333, CX</span><br><span class="line">        0x0010 00016 (E:\<span class="keyword">add</span>.go:7)      ADDL    $89, DI</span><br><span class="line">        0x0013 00019 (E:\<span class="keyword">add</span>.go:8)      RET</span><br><span class="line">        0x0000 48 83 c0 6f 81 c3 de 00 00 00 81 c1 4d 01 00 00  H..o........M...</span><br><span class="line">        0x0010 83 c7 59 c3   </span><br></pre></td></tr></table></figure>
+
+<p>结果一目了然吧，两个都开了编译优化 <code>-N</code> 1.14 用的完全是栈， 1.18 用了四个寄存器： <code>AX BX CX DI</code>,那最多会用多少个寄存器呢？</p>
+<figure class="highlight sas"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"># command-line-arguments</span><br><span class="line"><span class="string">&quot;&quot;</span>.demo STEXT nosplit size=66 args=0x48 locals=0x0 funcid=0x0 align=0x0</span><br><span class="line">        0x0000 00000 (E:\<span class="keyword">add</span>.go:3)      TEXT    <span class="string">&quot;&quot;</span>.demo(SB), NOSPLIT|ABIInternal, $0-72</span><br><span class="line">        0x0000 00000 (E:\<span class="keyword">add</span>.go:3)      FUNCDATA        $0, gclocals·33cdeccccebe80329f1fdbee7f5874cb(SB)</span><br><span class="line">        0x0000 00000 (E:\<span class="keyword">add</span>.go:3)      FUNCDATA        $1, gclocals·33cdeccccebe80329f1fdbee7f5874cb(SB)</span><br><span class="line">        0x0000 00000 (E:\<span class="keyword">add</span>.go:3)      FUNCDATA        $5, <span class="string">&quot;&quot;</span>.demo.arginfo1(SB)</span><br><span class="line">        0x0000 00000 (E:\<span class="keyword">add</span>.go:3)      FUNCDATA        $6, <span class="string">&quot;&quot;</span>.demo.argliveinfo(SB)</span><br><span class="line">        0x0000 00000 (E:\<span class="keyword">add</span>.go:3)      PCDATA  $3, $1</span><br><span class="line">        0x0000 00000 (E:\<span class="keyword">add</span>.go:14)     MOVQ    <span class="string">&quot;&quot;</span>.j+8(SP), DX</span><br><span class="line">        0x0005 00005 (E:\<span class="keyword">add</span>.go:14)     ADDQ    $787, DX</span><br><span class="line">        0x000c 00012 (E:\<span class="keyword">add</span>.go:16)     MOVQ    DX, <span class="string">&quot;&quot;</span>.~r9+16(SP)</span><br><span class="line">        0x0011 00017 (E:\<span class="keyword">add</span>.go:5)      ADDQ    $111, AX</span><br><span class="line">        0x0015 00021 (E:\<span class="keyword">add</span>.go:6)      ADDL    $222, BX</span><br><span class="line">        0x001b 00027 (E:\<span class="keyword">add</span>.go:7)      ADDL    $333, CX</span><br><span class="line">        0x0021 00033 (E:\<span class="keyword">add</span>.go:8)      ADDL    $89, DI</span><br><span class="line">        0x0024 00036 (E:\<span class="keyword">add</span>.go:9)      ADDQ    $99, SI</span><br><span class="line">        0x0028 00040 (E:\<span class="keyword">add</span>.go:10)     ADDQ    $88, R8</span><br><span class="line">        0x002c 00044 (E:\<span class="keyword">add</span>.go:11)     ADDQ    $999, R9</span><br><span class="line">        0x0033 00051 (E:\<span class="keyword">add</span>.go:12)     ADDQ    $898, R10</span><br><span class="line">        0x003a 00058 (E:\<span class="keyword">add</span>.go:13)     ADDQ    $989, R11</span><br><span class="line">        0x0041 00065 (E:\<span class="keyword">add</span>.go:16)     RET</span><br><span class="line">        0x0000 48 8b 54 24 08 48 81 c2 13 03 00 00 48 89 54 24  H.T$.H......H.T$</span><br><span class="line">        0x0010 10 48 83 c0 6f 81 c3 de 00 00 00 81 c1 4d 01 00  .H..o........M..</span><br><span class="line">        0x0020 00 83 c7 59 48 83 c6 63 49 83 c0 58 49 81 c1 e7  ...YH..cI..XI...</span><br><span class="line">        0x0030 03 00 00 49 81 c2 82 03 00 00 49 81 c3 dd 03 00  ...I......I.....</span><br><span class="line">        0x0040 00 c3     </span><br></pre></td></tr></table></figure>
+
+<p>答案是 9 个 超出的部分会按顺序放在栈上</p>
+<h2 id="go-version"><a href="#go-version" class="headerlink" title="go version"></a>go version</h2><p>这个指令最基本的用法是查看 go 版本</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">E:\1.18-beta\as&gt;go version</span><br><span class="line">go version go1.18beta1 windows/amd64</span><br></pre></td></tr></table></figure>
+
+<p>但其实它还可以看 go 编译产物的构建版本信息，这次增加了一个 <code>-m</code> 参数：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">E:\1.18-beta\as&gt;go version -m add.exe</span><br><span class="line">add.exe: go1.18beta1</span><br><span class="line">        path    command-line-arguments</span><br><span class="line">        build   -compiler=gc</span><br><span class="line">        build   -gcflags=-l -S</span><br><span class="line">        build   CGO_ENABLED=1</span><br><span class="line">        build   CGO_CFLAGS=</span><br><span class="line">        build   CGO_CPPFLAGS=</span><br><span class="line">        build   CGO_CXXFLAGS=</span><br><span class="line">        build   CGO_LDFLAGS=</span><br><span class="line">        build   GOARCH=amd64</span><br><span class="line">        build   GOOS=windows</span><br><span class="line">        build   GOAMD64=v1</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p> <a target="_blank" rel="noopener" href="https://go.dev/blog/go1.18beta1">Go 1.18 Beta 1 is available, with generics</a></p>
+<p><a target="_blank" rel="noopener" href="https://go.dev/doc/tutorial/generics">Tutorial: Getting started with generics</a></p>
+<p><a target="_blank" rel="noopener" href="https://pkg.go.dev/testing@master#hdr-Fuzzing">pkg.go.dev#Fuzzing</a></p>
+<p><a target="_blank" rel="noopener" href="https://go.googlesource.com/proposal/+/master/design/45713-workspace.md">Proposal: Multi-Module Workspaces in <code>cmd/go</code></a></p>
+
+      
+    </div>
+
+  </div>
+
+  <div class="article-footer">
+    <div class="article-meta pull-left">
+
+    
+      
+
+    <span class="post-categories">
+      <i class="icon-categories"></i>
+        <a href="/categories/Go/">Go</a>
+    </span>
+    
+
+    
+    
+
+    <span class="post-tags">
+      <i class="icon-tags"></i>
+        <a href="/tags/go/">go</a>
+    </span>
+    
+
+    </div>
+
+    
+  </div>
+</article>
+
+  
+
+
+
+
+
+
+
+
+
+    </main>
+
+    <footer class="site-footer">
+  <p class="site-info">
+    Proudly powered by <a href="https://hexo.io/" target="_blank">Hexo</a> and
+    Theme by <a href="https://github.com/520MianXiangDuiXiang520/Hacker" target="_blank">Hacker</a>
+    </br>
+    
+    &copy; 2024 Junebao
+    
+  </p>
+</footer>
+    
+    
+  </div>
+</div>
+</body>
+</html>

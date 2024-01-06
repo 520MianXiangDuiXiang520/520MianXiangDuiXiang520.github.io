@@ -1,0 +1,186 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Python3.10 结构化模式匹配 PEP 634 | Junebao</title>
+
+  
+  <meta name="author" content="Junebao">
+  
+
+  
+  <meta name="description" content="眼看 2021 马上结束，python 发布了它的 3.10 版本，优化了错误消息，上下文管理器等内容，但更吸引我的还是结构化模式匹配。">
+  
+
+  
+  
+  <meta name="keywords" content="Python">
+  
+
+  <meta id="viewport" name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  <meta property="og:title" content="Python3.10 结构化模式匹配 PEP 634"/>
+
+  <meta property="og:site_name" content="Junebao"/>
+
+  
+  <meta property="og:image" content="/favicon.ico"/>
+  
+
+  <link href="/favicon.ico" rel="icon">
+  <link rel="alternate" href="/atom.xml" title="Junebao" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+<div class="blog">
+  <div class="content">
+
+    <header>
+  <div class="site-branding">
+    <h1 class="site-title">
+      <a href="/">Junebao</a>
+    </h1>
+    <p class="site-description"></p>
+  </div>
+  <nav class="site-navigation">
+    <ul>
+      
+        
+          <li><a class="menu-uncover-a" href="/">主页</li>
+        
+      
+        
+          <li><a class="menu-uncover-a" href="/archives">归档</li>
+        
+      
+        
+          <li><a class="menu-uncover-a" href="/tags">标签</li>
+        
+      
+        
+          <li><a class="menu-uncover-a" href="/about">关于</li>
+        
+      
+    </ul>
+  </nav>
+</header>
+
+    <main class="site-main posts-loop">
+    <article>
+
+  
+    
+    <h3 class="article-title"><span>Python3.10 结构化模式匹配 PEP 634</span></h3>
+    
+  
+
+  <div class="article-top-meta">
+    <span class="posted-on">
+      <a href="/2021/12/15/python3.10-结构化模式匹配/" rel="bookmark">
+        <time class="entry-date published" datetime="2021-12-15T04:55:15.000Z">
+          2021-12-15
+        </time>
+      </a>
+    </span>
+  </div>
+
+
+  
+
+  <div class="article-content">
+    <div class="entry">
+      
+        <p>眼看 2021 马上结束，python 发布了它的 3.10 版本，优化了错误消息，上下文管理器等内容，但更吸引我的还是结构化模式匹配。</p>
+<span id="more"></span>
+
+<p>众所周之 <code>switch</code> 一直是 python 社区呼声比较高的一个功能，这次发布的结构化模式匹配 <code>match</code> 在功能上应该比 Java 或 C 中的这种 <code>switch</code> 强大一点。</p>
+<p><code>match</code> 的语法类似于其他语言的 <code>switch</code>:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">demo</span>(<span class="params">code: <span class="built_in">int</span></span>) -&gt; <span class="built_in">str</span>:</span><br><span class="line">    <span class="keyword">match</span> code:</span><br><span class="line">        <span class="keyword">case</span> <span class="number">200</span> | <span class="number">201</span> | <span class="number">202</span>:</span><br><span class="line">            <span class="keyword">return</span> <span class="string">&quot;OK&quot;</span></span><br><span class="line">        <span class="keyword">case</span> <span class="number">404</span>:</span><br><span class="line">            <span class="keyword">return</span> <span class="string">&quot;Not Found&quot;</span></span><br><span class="line">        <span class="keyword">case</span> _:</span><br><span class="line">            <span class="keyword">return</span> <span class="string">&quot;Internal Error&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    <span class="built_in">print</span>(demo(<span class="number">200</span>))</span><br></pre></td></tr></table></figure>
+
+<p>值得注意的是 <code>match</code> 语句中没有 <code>default</code> 关键字，而是使用一个 <code>_</code> 代替。<code>match</code> 会 <strong>从上到下</strong> 匹配 case 直到匹配成功或遇到 <code>_</code> 跳出 <code>match</code> 结构. 多个相同行为的匹配项可以使用 <code>|</code> 连接</p>
+<p>注意 <code>_</code> 只能放在最后一个 case 的位置，否则会抛出异常：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> _:</span><br><span class="line">     ^</span><br><span class="line">SyntaxError: wildcard makes remaining patterns unreachable</span><br></pre></td></tr></table></figure>
+
+<p>除了匹配常量， <code>match</code> 还可以匹配变量，看官网这个例子：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">demo3</span>(<span class="params">pos</span>):</span><br><span class="line">    <span class="keyword">match</span> pos:</span><br><span class="line">        <span class="keyword">case</span> (<span class="number">0</span>, <span class="number">0</span>):</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&quot;Origin&quot;</span>)</span><br><span class="line">        <span class="keyword">case</span> (<span class="number">0</span>, y):</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">f&quot;Y=<span class="subst">&#123;y&#125;</span>&quot;</span>)</span><br><span class="line">        <span class="keyword">case</span> (x, <span class="number">0</span>):</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">f&quot;X=<span class="subst">&#123;x&#125;</span>&quot;</span>)</span><br><span class="line">        <span class="keyword">case</span> (x, y):</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">f&quot;X=<span class="subst">&#123;x&#125;</span>, Y=<span class="subst">&#123;y&#125;</span>&quot;</span>)</span><br><span class="line">        <span class="keyword">case</span> _:</span><br><span class="line">            <span class="keyword">raise</span> ValueError(<span class="string">&quot;Not a point&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    demo3((<span class="number">0</span>, <span class="number">1</span>))  <span class="comment"># Y=1</span></span><br></pre></td></tr></table></figure>
+
+<p>行为类似于将一个元组解包为 x 和 y 再匹配, 在这种模式下， <code>_</code> 有了新的用途，它可以表示一个通配符，如：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">demo6</span>(<span class="params">log</span>):</span><br><span class="line">    <span class="keyword">match</span> log:</span><br><span class="line">        <span class="keyword">case</span> (<span class="string">&#x27;warning&#x27;</span>, code, <span class="number">40</span>):</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&quot;A warning has been received.&quot;</span>)</span><br><span class="line">        <span class="keyword">case</span> (<span class="string">&#x27;error&#x27;</span>, code, _):</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">f&quot;An error <span class="subst">&#123;code&#125;</span> occurred.&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    demo6((<span class="string">&quot;error&quot;</span>, <span class="number">400</span>, <span class="number">80</span>)) <span class="comment"># An error 400 occurred.</span></span><br></pre></td></tr></table></figure>
+
+<p>除此之外， <code>match</code> 还可以根据类的属性进行匹配，如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Player</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, role: <span class="built_in">int</span>, online: <span class="built_in">bool</span></span>):</span><br><span class="line">        self.role = role</span><br><span class="line">        self.online = online</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">demo4</span>(<span class="params">p: Player</span>):</span><br><span class="line">    <span class="keyword">match</span> p:</span><br><span class="line">        <span class="keyword">case</span> Player(role=<span class="number">1</span>, online=<span class="literal">False</span>):</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&quot;role 1 offline&quot;</span>)</span><br><span class="line">        <span class="keyword">case</span> Player(role=<span class="number">1</span>, online=<span class="literal">True</span>):</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&quot;role 1 online&quot;</span>)</span><br><span class="line">        <span class="keyword">case</span> _:</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&quot;not role 1&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    demo4(Player(<span class="number">1</span>, <span class="literal">True</span>))</span><br></pre></td></tr></table></figure>
+
+<p>你甚至可以嵌套使用上面这些特性：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">demo5</span>(<span class="params">role: <span class="built_in">int</span>, online: <span class="built_in">bool</span></span>):</span><br><span class="line">    <span class="keyword">match</span> [Player(role, online)]:</span><br><span class="line">        <span class="keyword">case</span> []:</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&quot;empty player box&quot;</span>)</span><br><span class="line">        <span class="keyword">case</span> [Player(role=role, online=<span class="literal">False</span>)]:</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">f&quot;role <span class="subst">&#123;role&#125;</span> offline&quot;</span>)</span><br><span class="line">        <span class="keyword">case</span> [Player(role=role, online=<span class="literal">True</span>)]:</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">f&quot;role <span class="subst">&#123;role&#125;</span> online&quot;</span>)</span><br><span class="line">        <span class="keyword">case</span> _:</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&quot;bad player box&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    demo5(<span class="number">2</span>, <span class="literal">False</span>)</span><br></pre></td></tr></table></figure>
+
+<p>如果你的匹配条件很复杂，你甚至可以像下面这样在 case 语句上加守护项：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">demo7</span>(<span class="params">log</span>):</span><br><span class="line">    <span class="keyword">match</span> log:</span><br><span class="line">        <span class="keyword">case</span> (<span class="string">&#x27;warning&#x27;</span>, code, <span class="number">40</span>):</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&quot;A warning has been received.&quot;</span>)</span><br><span class="line">        <span class="keyword">case</span> (<span class="string">&#x27;error&#x27;</span>, code, _) <span class="keyword">if</span> code <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">400</span>, <span class="number">500</span>):</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">f&quot;An client error <span class="subst">&#123;code&#125;</span> occurred.&quot;</span>)</span><br><span class="line">        <span class="keyword">case</span> (<span class="string">&#x27;error&#x27;</span>, code, _) <span class="keyword">if</span> code <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">500</span>, <span class="number">600</span>):</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">f&quot;An server error <span class="subst">&#123;code&#125;</span> occurred.&quot;</span>)</span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    demo7((<span class="string">&quot;error&quot;</span>, <span class="number">418</span>, <span class="number">80</span>)) <span class="comment"># An client error 418 occurred.</span></span><br><span class="line">    demo7((<span class="string">&quot;error&quot;</span>, <span class="number">512</span>, <span class="number">80</span>)) <span class="comment"># An server error 512 occurred.</span></span><br></pre></td></tr></table></figure>
+
+<p>总之，<code>match</code> 确实能减少某些场合下的开发负担，但很害怕未来 Python 为了功能 “全” 而变得越来越复杂和臃肿。</p>
+<p>还有一些其他发布的新功能和特性参见 <a target="_blank" rel="noopener" href="https://docs.python.org/zh-cn/3/whatsnew/3.10.html#pep-634-structural-pattern-matching">whatnew 3.10</a></p>
+
+      
+    </div>
+
+  </div>
+
+  <div class="article-footer">
+    <div class="article-meta pull-left">
+
+    
+      
+
+    <span class="post-categories">
+      <i class="icon-categories"></i>
+        <a href="/categories/Python/">Python</a>
+    </span>
+    
+
+    
+    
+
+    <span class="post-tags">
+      <i class="icon-tags"></i>
+        <a href="/tags/Python/">Python</a>
+    </span>
+    
+
+    </div>
+
+    
+  </div>
+</article>
+
+  
+
+
+
+
+
+
+
+
+
+    </main>
+
+    <footer class="site-footer">
+  <p class="site-info">
+    Proudly powered by <a href="https://hexo.io/" target="_blank">Hexo</a> and
+    Theme by <a href="https://github.com/520MianXiangDuiXiang520/Hacker" target="_blank">Hacker</a>
+    </br>
+    
+    &copy; 2024 Junebao
+    
+  </p>
+</footer>
+    
+    
+  </div>
+</div>
+</body>
+</html>

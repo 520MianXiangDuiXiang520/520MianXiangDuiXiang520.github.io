@@ -1,0 +1,450 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>robfig/cron/v3 源码阅读 | Junebao</title>
+
+  
+  <meta name="author" content="Junebao">
+  
+
+  
+  <meta name="description" content="robfig/cron/v3 是一个 Golang 的定时任务库，支持 cron 表达式。Cron 的源码真实教科书级别的存在（可能是我菜 …）,真的把低耦合高内聚体现地淋漓尽致，另外其中涉及的装饰器模式，并发处理等都很值得学习。">
+  
+
+  
+  
+  <meta name="keywords" content="go">
+  
+
+  <meta id="viewport" name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  <meta property="og:title" content="robfig/cron/v3 源码阅读"/>
+
+  <meta property="og:site_name" content="Junebao"/>
+
+  
+  <meta property="og:image" content="/favicon.ico"/>
+  
+
+  <link href="/favicon.ico" rel="icon">
+  <link rel="alternate" href="/atom.xml" title="Junebao" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+<div class="blog">
+  <div class="content">
+
+    <header>
+  <div class="site-branding">
+    <h1 class="site-title">
+      <a href="/">Junebao</a>
+    </h1>
+    <p class="site-description"></p>
+  </div>
+  <nav class="site-navigation">
+    <ul>
+      
+        
+          <li><a class="menu-uncover-a" href="/">主页</li>
+        
+      
+        
+          <li><a class="menu-uncover-a" href="/archives">归档</li>
+        
+      
+        
+          <li><a class="menu-uncover-a" href="/tags">标签</li>
+        
+      
+        
+          <li><a class="menu-uncover-a" href="/about">关于</li>
+        
+      
+    </ul>
+  </nav>
+</header>
+
+    <main class="site-main posts-loop">
+    <article>
+
+  
+    
+    <h3 class="article-title"><span>robfig/cron/v3 源码阅读</span></h3>
+    
+  
+
+  <div class="article-top-meta">
+    <span class="posted-on">
+      <a href="/2022/03/09/09_cron源码阅读/" rel="bookmark">
+        <time class="entry-date published" datetime="2022-03-09T04:55:15.000Z">
+          2022-03-09
+        </time>
+      </a>
+    </span>
+  </div>
+
+
+  
+
+  <div class="article-content">
+    <div class="entry">
+      
+        <p><code>robfig/cron/v3</code> 是一个 Golang 的定时任务库，支持 cron 表达式。Cron 的源码真实教科书级别的存在（可能是我菜 …）,真的把低耦合高内聚体现地淋漓尽致，另外其中涉及的装饰器模式，并发处理等都很值得学习。</p>
+<span id="more"></span>
+
+<p>使用 cron 可以很方便的实现一个定时任务，如下：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">go</span> get github.com/robfig/cron/v3@v3<span class="number">.0</span><span class="number">.0</span></span><br></pre></td></tr></table></figure>
+
+ <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> <span class="string">&quot;github.com/robfig/cron/v3&quot;</span></span><br><span class="line"></span><br><span class="line">c := cron.New()</span><br><span class="line"><span class="comment">// 添加一个任务，每 30s 执行一次</span></span><br><span class="line">c.AddFunc(<span class="string">&quot;30 * * * *&quot;</span>, <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123; fmt.Println(<span class="string">&quot;Every hour on the half hour&quot;</span>) &#125;)</span><br><span class="line"><span class="comment">// 开始执行（每个任务会在自己的 goroutine 中执行）</span></span><br><span class="line">c.Start()</span><br><span class="line"></span><br><span class="line"><span class="comment">// 允许往正在执行的 cron 中添加任务</span></span><br><span class="line">c.AddFunc(<span class="string">&quot;@daily&quot;</span>, <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123; fmt.Println(<span class="string">&quot;Every day&quot;</span>) &#125;)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 检查上一个和下一个任务执行的时间</span></span><br><span class="line">inspect(c.Entries())</span><br><span class="line">..</span><br><span class="line">c.Stop()  <span class="comment">// 停止调度，但正在运行的作业不会被停止</span></span><br></pre></td></tr></table></figure>
+
+<p>通过上面的示例，可以发现， cron 最常用的几个函数：</p>
+<ul>
+<li><code>New()</code>: 实例化一个 cron 对象</li>
+<li><code>Cron.AddFunc()</code>: 向 Cron 对象中添加一个作业，接受两个参数，第一个是 <code>cron</code> 表达式，第二个是一个无参无返回值的函数（作业）</li>
+<li><code>Cron.Stop()</code>: 停止调度，Stop 之后不会再有未执行的作业被唤醒，但已经开始执行的作业不会受影响。</li>
+</ul>
+<p>关于 cron 表达式可以先看看 <a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_39135287/article/details/95664533?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-2.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-2.control">cron表达式的介绍与使用</a> 这篇文章，一个 cron 表达式是一个由 5 个空格分隔的字符串，每一部分从左到右分别表示 秒，分， 时， 天，月， 星期，每个部分由数字和一些特殊字符表示一个约定的时间项，在  <code>robfig/cron</code> 中，每一部分允许的特殊字符如下：</p>
+<table>
+<thead>
+<tr>
+<th>Field name</th>
+<th>是否强制 ?</th>
+<th>允许的值</th>
+<th>允许的特殊字符</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Seconds</td>
+<td>Yes</td>
+<td>0-59</td>
+<td>* &#x2F; , -</td>
+</tr>
+<tr>
+<td>Minutes</td>
+<td>Yes</td>
+<td>0-59</td>
+<td>* &#x2F; , -</td>
+</tr>
+<tr>
+<td>Hours</td>
+<td>Yes</td>
+<td>0-23</td>
+<td>* &#x2F; , -</td>
+</tr>
+<tr>
+<td>Day of month</td>
+<td>Yes</td>
+<td>1-31</td>
+<td>* &#x2F; , - ?</td>
+</tr>
+<tr>
+<td>Month</td>
+<td>Yes</td>
+<td>1-12 or JAN-DEC</td>
+<td>* &#x2F; , -</td>
+</tr>
+<tr>
+<td>Day of week</td>
+<td>Yes</td>
+<td>0-6 or SUN-SAT</td>
+<td>* &#x2F; , - ?</td>
+</tr>
+</tbody></table>
+<p>这些特殊字符的含义如下：</p>
+<ul>
+<li><code>*</code>: 匹配该字段所有值，如 <code>0 0 * 1 1 *</code>, 第三个字段为 <code>*</code> 表示（1 月 1 日）每小时。</li>
+<li><code>/</code>: 表示范围增量，如 <code>*/12 * * * * *</code> 表示每 12 秒执行一次</li>
+<li><code>,</code>: 用来分隔同一组中的项目，如 <code>* * 5,10,15 3,4 * *</code> 表示每个三月或四月的 5， 10， 15 号（3.05， 3.10， 3.15， 4.05， 4.10，4.15）</li>
+<li><code>-</code>: 表示范围，如 <code>*/5 * 10-12 * * *</code> 表示每天十点到十二点每五秒执行一次</li>
+<li><code>?</code>: 同 <code>*</code></li>
+</ul>
+<p>cron 表达式虽然简单，但他却能满足定时任务复杂的使用场景，比如每周一到周五早上十点就可以表示为 <code>0 0 10 * * 1-5</code>,除此之外，cron 还有几个预定义的时间表：</p>
+<table>
+<thead>
+<tr>
+<th>Entry</th>
+<th>Description</th>
+<th>Equivalent To</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>@yearly (or @annually)</td>
+<td>Run once a year, midnight, Jan. 1st</td>
+<td>0 0 1 1 *</td>
+</tr>
+<tr>
+<td>@monthly</td>
+<td>Run once a month, midnight, first of month</td>
+<td>0 0 1 * *</td>
+</tr>
+<tr>
+<td>@weekly</td>
+<td>Run once a week, midnight between Sat&#x2F;Sun</td>
+<td>0 0 * * 0</td>
+</tr>
+<tr>
+<td>@daily (or @midnight)</td>
+<td>Run once a day, midnight</td>
+<td>0 0 * * *</td>
+</tr>
+<tr>
+<td>@hourly</td>
+<td>Run once an hour, beginning of hour</td>
+<td>0 * * * *</td>
+</tr>
+</tbody></table>
+<p>表示每隔多长时间时，你还可以使用预定义的 <code>@every &lt;duration&gt;</code> 如每隔十分钟就可以表示为 <code>@every 10m</code></p>
+<p>……</p>
+<h2 id="源码概览"><a href="#源码概览" class="headerlink" title="源码概览"></a>源码概览</h2><p>cron 并不是一个很大的库，核心文件与作用如下：</p>
+<ul>
+<li><code>chain.go</code>: 装饰器模式，使用 Chain 可以给一个作业添加多个装饰器，以实现日志记录等功能</li>
+<li><code>constantdelay.go</code>：顾名思义，提供了一个简单的常量延迟，如 每5分钟，最小粒度支持到秒</li>
+<li><code>cron.go</code>：提供核心功能</li>
+<li><code>logger.go</code>： 定义了一个 Logger 接口，使之能插入到结构化日志系统中</li>
+<li><code>option.go</code>：对默认行为的修改相关</li>
+<li><code>parser.go</code>：解析 cron 表达式</li>
+<li><code>spec.go</code>：</li>
+</ul>
+<h3 id="核心数据结构和接口"><a href="#核心数据结构和接口" class="headerlink" title="核心数据结构和接口"></a>核心数据结构和接口</h3><h4 id="type-Entry-truct"><a href="#type-Entry-truct" class="headerlink" title="type Entry truct"></a>type Entry truct</h4><p><code>Entry</code> 是对添加到 Cron 中的作业的封装，每个 Entry 有一个 ID，除此之外，Entry 里保存了这个作业上次运行的时间和下次运行的时间。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> EntryID <span class="type">int</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> Entry <span class="keyword">struct</span> &#123;</span><br><span class="line">	ID EntryID</span><br><span class="line">	Schedule Schedule</span><br><span class="line">	Next time.Time</span><br><span class="line">	Prev time.Time</span><br><span class="line">	WrappedJob Job</span><br><span class="line">	Job Job</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="type-Cron-struct"><a href="#type-Cron-struct" class="headerlink" title="type Cron struct"></a>type Cron struct</h4><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Cron <span class="keyword">struct</span> &#123;</span><br><span class="line">    entries   []*Entry          <span class="comment">// 保存了所有加入到 Cron 的作业</span></span><br><span class="line">    chain     Chain</span><br><span class="line">    stop      <span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;     <span class="comment">// 接收 Stop() 信号的 chan</span></span><br><span class="line">    add       <span class="keyword">chan</span> *Entry       <span class="comment">// Cron 运行过程中接收 AddJob() 信号的 chan </span></span><br><span class="line">    remove    <span class="keyword">chan</span> EntryID      <span class="comment">// 接收移除 Job 信号的 chan</span></span><br><span class="line">    snapshot  <span class="keyword">chan</span> <span class="keyword">chan</span> []Entry <span class="comment">// 快照信号</span></span><br><span class="line">    running   <span class="type">bool</span>              <span class="comment">// 标志 Cron 是否在运行中</span></span><br><span class="line">    logger    Logger</span><br><span class="line">    runningMu sync.Mutex        <span class="comment">// Cron 运行前需要抢占该锁，保证并发安全</span></span><br><span class="line">    location  *time.Location</span><br><span class="line">    parser    ScheduleParser    <span class="comment">// cron 表达式的解析器</span></span><br><span class="line">    nextID    EntryID           <span class="comment">// 即将加入的 Job 对应的 Entry 的 ID</span></span><br><span class="line">    jobWaiter sync.WaitGroup</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="interface"><a href="#interface" class="headerlink" title="interface"></a>interface</h4><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Cron 表达式解析器接口，Parse 方法接收一个 Cron 表达式 spec,</span></span><br><span class="line"><span class="comment">// 返回一个解析出的 Schedule 类型对象</span></span><br><span class="line"><span class="keyword">type</span> ScheduleParser <span class="keyword">interface</span> &#123;</span><br><span class="line">	Parse(spec <span class="type">string</span>) (Schedule, <span class="type">error</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Schedule 类型的对象用来表输 Job 的工作周期，它包含一个 Next() 方法，</span></span><br><span class="line"><span class="comment">// 用来返回 Job 下一次执行的时间</span></span><br><span class="line"><span class="keyword">type</span> Schedule <span class="keyword">interface</span> &#123;</span><br><span class="line">	Next(time.Time) time.Time</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Job is an interface for submitted cron jobs.</span></span><br><span class="line"><span class="keyword">type</span> Job <span class="keyword">interface</span> &#123;</span><br><span class="line">	Run()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="对接口的实现"><a href="#对接口的实现" class="headerlink" title="对接口的实现"></a>对接口的实现</h3><h4 id="ScheduleParser-的实现"><a href="#ScheduleParser-的实现" class="headerlink" title="ScheduleParser 的实现"></a>ScheduleParser 的实现</h4><p>在 <code>parser.go</code> 中，我们可以找到对 ScheduleParser 接口的实现 <code>Parser</code>：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Parser <span class="keyword">struct</span> &#123;</span><br><span class="line">	options ParseOption</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(p Parser)</span></span> Parse(spec <span class="type">string</span>) (Schedule, <span class="type">error</span>) &#123;...&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Parser 通过 <code>NewParser()</code> 方法创建：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewParser</span><span class="params">(options ParseOption)</span></span> Parser &#123;</span><br><span class="line">	optionals := <span class="number">0</span></span><br><span class="line">	<span class="keyword">if</span> options&amp;DowOptional &gt; <span class="number">0</span> &#123;</span><br><span class="line">		optionals++</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> options&amp;SecondOptional &gt; <span class="number">0</span> &#123;</span><br><span class="line">		optionals++</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> optionals &gt; <span class="number">1</span> &#123;</span><br><span class="line">		<span class="built_in">panic</span>(<span class="string">&quot;multiple optionals may not be configured&quot;</span>)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> Parser&#123;options&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>除此之外，<code>parser.go</code> 中，创建了一个私有的全局变量 <code>standardParser</code>：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> standardParser = NewParser(</span><br><span class="line">	Minute | Hour | Dom | Month | Dow | Descriptor,</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>后续 Cron 所使用的就是这个解析器。</p>
+<h4 id="Schedule-的实现"><a href="#Schedule-的实现" class="headerlink" title="Schedule 的实现"></a>Schedule 的实现</h4><p>Schedule 的实现位于 <code>spec.go</code> 中，定义了一个 <code>SpecSchedule</code> 结构体，实现了 <code>Schedule</code> 接口：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> SpecSchedule <span class="keyword">struct</span> &#123;</span><br><span class="line">	Second, Minute, Hour, Dom, Month, Dow <span class="type">uint64</span></span><br><span class="line">	Location *time.Location</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *SpecSchedule)</span></span> Next(t time.Time) time.Time &#123;...&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="Job-的实现"><a href="#Job-的实现" class="headerlink" title="Job 的实现"></a>Job 的实现</h4><p>Job 其实就是用户传入的一个函数，对其的实现位于 <code>cron.go</code> 中：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> FuncJob <span class="function"><span class="keyword">func</span><span class="params">()</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(f FuncJob)</span></span> Run() &#123; f() &#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>Cron 中核心数据结构的类图如下：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/520MianXiangDuiXiang520/cdn@master/img/1613570298647-1613570298614.png"></p>
+<h2 id="New"><a href="#New" class="headerlink" title="New()"></a>New()</h2><p><code>cron.go</code> 中的 <code>New()</code> 方法用来创建并返回一个 <code>Corn</code> 对象指针，其实现如下：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">New</span><span class="params">(opts ...Option)</span></span> *Cron &#123;</span><br><span class="line">	c := &amp;Cron&#123;</span><br><span class="line">		entries:   <span class="literal">nil</span>,</span><br><span class="line">		chain:     NewChain(),</span><br><span class="line">		add:       <span class="built_in">make</span>(<span class="keyword">chan</span> *Entry),</span><br><span class="line">		stop:      <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;),</span><br><span class="line">		snapshot:  <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">chan</span> []Entry),</span><br><span class="line">		remove:    <span class="built_in">make</span>(<span class="keyword">chan</span> EntryID),</span><br><span class="line">		running:   <span class="literal">false</span>,</span><br><span class="line">		runningMu: sync.Mutex&#123;&#125;,</span><br><span class="line">		logger:    DefaultLogger,</span><br><span class="line">		location:  time.Local,</span><br><span class="line">		parser:    standardParser,</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">for</span> _, opt := <span class="keyword">range</span> opts &#123;</span><br><span class="line">		opt(c)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> c</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个函数接收一组可变的 Option 类型的参数，该类型实际上是一类函数：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Option <span class="function"><span class="keyword">func</span><span class="params">(*Cron)</span></span></span><br></pre></td></tr></table></figure>
+
+<p>Corn 内置了一些 Option 类型的函数，都在 <code>option.go</code> 中，以 <code>With</code> 开头，用来改变 <code>Cron</code> 的默认行为，在 <code>New()</code> 中创建完 <code>Cron</code> 之后，会依次执行这些函数。</p>
+<p>另外，注意 <code>c.parser</code> 的值是 <code>standardParser</code>, 这个变量在上一节介绍过，位于 <code>parser.go</code> 中，是一个 <code>Parse</code> 类型的变量， <code>Parse</code> 是对 <code>SchedleParse</code> 的一个默认实现。</p>
+<h2 id="AddFunc"><a href="#AddFunc" class="headerlink" title="AddFunc()"></a>AddFunc()</h2><p><code>AddFunc()</code> 用于向 Corn 中添加一个作业：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *Cron)</span></span> AddFunc(spec <span class="type">string</span>, cmd <span class="function"><span class="keyword">func</span><span class="params">()</span></span>) (EntryID, <span class="type">error</span>) &#123;</span><br><span class="line">    <span class="comment">// 包装</span></span><br><span class="line">	<span class="keyword">return</span> c.AddJob(spec, FuncJob(cmd))</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *Cron)</span></span> AddJob(spec <span class="type">string</span>, cmd Job) (EntryID, <span class="type">error</span>) &#123;</span><br><span class="line">	schedule, err := c.parser.Parse(spec)</span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>, err</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> c.Schedule(schedule, cmd), <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>AddFunc()</code> 相较于 <code>AddJob()</code>  帮用户省去了包装成 <code>Job</code> 类型的一步，在 <code>AddJob()</code>  中，调用了 <code>standardParser.Parse()</code> 将 cron 表达式解释成了 schedule 类型，最终，他们调用了 <code>Schedule()</code> 方法：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *Cron)</span></span> Schedule(schedule Schedule, cmd Job) EntryID &#123;</span><br><span class="line">	c.runningMu.Lock()</span><br><span class="line">	<span class="keyword">defer</span> c.runningMu.Unlock()</span><br><span class="line">	c.nextID++</span><br><span class="line">	entry := &amp;Entry&#123;</span><br><span class="line">		ID:         c.nextID,</span><br><span class="line">		Schedule:   schedule,</span><br><span class="line">		WrappedJob: c.chain.Then(cmd),</span><br><span class="line">		Job:        cmd,</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> !c.running &#123;</span><br><span class="line">		c.entries = <span class="built_in">append</span>(c.entries, entry)</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		c.add &lt;- entry</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> entry.ID</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个方法负责创建 Entry 结构体，并把它追加到 Cron 的 entries 列表中，如果 Cron 已经处于运行状态，会将这个创建好的 <code>entry</code> 发送到 Cron 的 <code>add</code> chan 中，在 <code>run()</code> 中会处理这种情况。</p>
+<h2 id="Entries-和-Entry"><a href="#Entries-和-Entry" class="headerlink" title="Entries() 和 Entry()"></a>Entries() 和 Entry()</h2><p>这两个方法被用来返回 Cron entries 的一组快照，<code>Entries()</code> 返回所有作业的快照，<code>Entry(id EntryID)</code> 根据 ID 返回特定作业的快照，其实就是遍历了一遍 <code>Entries()</code> 的返回值：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *Cron)</span></span> Entry(id EntryID) Entry &#123;</span><br><span class="line">	<span class="keyword">for</span> _, entry := <span class="keyword">range</span> c.Entries() &#123;</span><br><span class="line">		<span class="keyword">if</span> id == entry.ID &#123;</span><br><span class="line">			<span class="keyword">return</span> entry</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> Entry&#123;&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>关键在于 <code>Entries()</code> 的实现上：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *Cron)</span></span> Entries() []Entry &#123;</span><br><span class="line">	c.runningMu.Lock()</span><br><span class="line">	<span class="keyword">defer</span> c.runningMu.Unlock()</span><br><span class="line">	<span class="keyword">if</span> c.running &#123;</span><br><span class="line">		replyChan := <span class="built_in">make</span>(<span class="keyword">chan</span> []Entry, <span class="number">1</span>)</span><br><span class="line">		c.snapshot &lt;- replyChan</span><br><span class="line">		<span class="keyword">return</span> &lt;-replyChan</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> c.entrySnapshot()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>获取快照时，根据 Cron 是否在运行有不同的处理逻辑，为了避免获取快照过程中 Cron 开始运行，需要竞争 <code>runningMutex</code>;</p>
+<p>如果 Cron 没在运行，直接调用 <code>entrySnapshot()</code> 返回快照：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *Cron)</span></span> entrySnapshot() []Entry &#123;</span><br><span class="line">	<span class="keyword">var</span> entries = <span class="built_in">make</span>([]Entry, <span class="built_in">len</span>(c.entries))</span><br><span class="line">	<span class="keyword">for</span> i, e := <span class="keyword">range</span> c.entries &#123;</span><br><span class="line">		entries[i] = *e</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> entries</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这种情况很简单，如果 Cron 已经在运行中了，会向 <code>c.snapshot</code> 发送一个信号，在 <code>cron.run()</code> 中会处理这个信号：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> replyChan := &lt;-c.snapshot:</span><br><span class="line">    replyChan &lt;- c.entrySnapshot()</span><br><span class="line">    <span class="keyword">continue</span></span><br></pre></td></tr></table></figure>
+
+<p>这有点向一个钩子，<code>Entries()</code> 中创建了一个新的 chan <code>replyChan</code>, 并将其发送给了 <code>c.snapshot</code>, <code>run()</code> 中通过多路复用监听到这个信号后，调用了 <code>c.entrySnapshot()</code> ,并将结果发送到了 <code>replyChan</code> 中，<code>Entries()</code> 阻塞等待结果并返回。</p>
+<p>既然最终调用的都是 <code>c.entrySnapshot()</code> 为什么要分两种情况呢？后面再说。</p>
+<h2 id="Remove"><a href="#Remove" class="headerlink" title="Remove()"></a>Remove()</h2><p><code>Remove()</code> 用于删除一个作业，实现逻辑和 <code>Entries()</code> 类似：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *Cron)</span></span> Remove(id EntryID) &#123;</span><br><span class="line">	c.runningMu.Lock()</span><br><span class="line">	<span class="keyword">defer</span> c.runningMu.Unlock()</span><br><span class="line">	<span class="keyword">if</span> c.running &#123;</span><br><span class="line">		c.remove &lt;- id</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		c.removeEntry(id)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *Cron)</span></span> removeEntry(id EntryID) &#123;</span><br><span class="line">	<span class="keyword">var</span> entries []*Entry</span><br><span class="line">	<span class="keyword">for</span> _, e := <span class="keyword">range</span> c.entries &#123;</span><br><span class="line">		<span class="keyword">if</span> e.ID != id &#123;</span><br><span class="line">			entries = <span class="built_in">append</span>(entries, e)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	c.entries = entries</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>run()</code> 中处理 <code>c.remove</code> 信号：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> id := &lt;-c.remove:</span><br><span class="line">    timer.Stop()</span><br><span class="line">    now = c.now()</span><br><span class="line">    c.removeEntry(id)</span><br><span class="line">    c.logger.Info(<span class="string">&quot;removed&quot;</span>, <span class="string">&quot;entry&quot;</span>, id)</span><br></pre></td></tr></table></figure>
+
+<h2 id="Stop"><a href="#Stop" class="headerlink" title="Stop()"></a>Stop()</h2><p><code>Stop()</code> 用来停止 Cron 的运行，但已经在执行中的作业是不会被打断的，也就是从执行 <code>Stop()</code> 之后，不会再有新的作业被调度：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *Cron)</span></span> Stop() context.Context &#123;</span><br><span class="line">	c.runningMu.Lock()</span><br><span class="line">	<span class="keyword">defer</span> c.runningMu.Unlock()</span><br><span class="line">	<span class="keyword">if</span> c.running &#123;</span><br><span class="line">		c.stop &lt;- <span class="keyword">struct</span>&#123;&#125;&#123;&#125;</span><br><span class="line">		c.running = <span class="literal">false</span></span><br><span class="line">	&#125;</span><br><span class="line">	ctx, cancel := context.WithCancel(context.Background())</span><br><span class="line">	<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">         <span class="comment">// 等待所有已经在执行的作业执行完毕</span></span><br><span class="line">		c.jobWaiter.Wait()</span><br><span class="line">         <span class="comment">// 会发出一个 cancelCtx.Done() 信号</span></span><br><span class="line">		cancel()</span><br><span class="line">	&#125;()</span><br><span class="line">	<span class="keyword">return</span> ctx</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>大体逻辑和上面的一样，比较巧妙地是 <code>Stop()</code> 返回了一个 <code>Context</code>, 具体来说是一个 <code>cancelCtx</code>, 用户可以监听 <code>cancelCtx.Done()</code> 得知什么时候 Cron 真的停止了.</p>
+<h2 id="Start"><a href="#Start" class="headerlink" title="Start()"></a>Start()</h2><p><code>Start()</code> 用于开始执行 Cron:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *Cron)</span></span> Start() &#123;</span><br><span class="line">	c.runningMu.Lock()</span><br><span class="line">	<span class="keyword">defer</span> c.runningMu.Unlock()</span><br><span class="line">	<span class="keyword">if</span> c.running &#123;</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line">	c.running = <span class="literal">true</span></span><br><span class="line">	<span class="keyword">go</span> c.run()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个函数干了三件事：</p>
+<ol>
+<li>获取锁</li>
+<li>将 <code>c.running</code> 置为 <code>true</code> 表示 cron 已经在运行中了</li>
+<li>开启一个 goroutine 执行 <code>c.run()</code>, <code>run</code> 中会一直轮循 <code>c.entries</code> 中的 entry, 如果一个 entry 允许执行了，就会开启单独的 goroutine 去执行这个作业</li>
+</ol>
+<p><code>run</code>是整个 cron 的一个核心，它负责处理 cron 开始执行后的大部分事情，包括添加作业，删除作业，执行作业等，这是一个近一百行的大函数，其结构如下：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *Cron)</span></span> run() &#123;</span><br><span class="line">	c.logger.Info(<span class="string">&quot;start&quot;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 第一部分</span></span><br><span class="line">	now := c.now()</span><br><span class="line">	<span class="keyword">for</span> _, entry := <span class="keyword">range</span> c.entries &#123;</span><br><span class="line">		entry.Next = entry.Schedule.Next(now)</span><br><span class="line">		c.logger.Info(<span class="string">&quot;schedule&quot;</span>, <span class="string">&quot;now&quot;</span>, now, <span class="string">&quot;entry&quot;</span>, entry.ID, <span class="string">&quot;next&quot;</span>, entry.Next)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 第二部分</span></span><br><span class="line">	<span class="keyword">for</span> &#123;</span><br><span class="line">        <span class="comment">// 2.1</span></span><br><span class="line">		sort.Sort(byTime(c.entries))</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 2.2</span></span><br><span class="line">		<span class="keyword">var</span> timer *time.Timer</span><br><span class="line">		<span class="keyword">if</span> <span class="built_in">len</span>(c.entries) == <span class="number">0</span> || c.entries[<span class="number">0</span>].Next.IsZero() &#123;</span><br><span class="line">			timer = time.NewTimer(<span class="number">100000</span> * time.Hour)</span><br><span class="line">		&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">			timer = time.NewTimer(c.entries[<span class="number">0</span>].Next.Sub(now))</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 2.3</span></span><br><span class="line">		<span class="keyword">for</span> &#123;</span><br><span class="line">			<span class="keyword">select</span> &#123;&#125;</span><br><span class="line">			<span class="keyword">break</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>大概包含下面这几部分：</p>
+<ul>
+<li><p>第一部分：遍历了 <code>c.entries</code> 列表，通过 <code>schedule.Next()</code> 计算出这个作业下一次执行的时间，并赋值给了 <code>entry.Next</code> 字段。</p>
+</li>
+<li><p>第二部分是一个死循环，这一部分又可以分为三个部分：</p>
+<ul>
+<li><p>2.1：调用了 sort 的快排，其实是对 entries 中的元素按 <code>Next</code> 字段的时间线后顺序排序。</p>
+</li>
+<li><p>2.2：这一部分是对定时器的一个初始化操作：如果没有可以执行的作业，定时器被设置为十万小时后触发（其实就是休眠），否则定时器会在第一个作业允许被执行时触发，定时器触发后， 2.3 部分会去做剩下的事。</p>
+</li>
+<li><p>2.3：这又是整个 <code>run</code> 的核心，其主体是一个死循环（其实它会退出，不算是死循环），这个循环里面的核心又是一个 <code>select</code> 多路复用，这个多路复用里监听了五种信号，这五种信号是怎样发出的我们在上面其实已经说过了，他们分别是定时器触发信号 <code>timer.C</code>, 运行过程中添加作业的信号 <code>c.add</code>,  快照信号 <code>c.snapshot</code>, cron 停止的信号 <code>c.stop</code>, 移除作业的信号 <code>c.remove</code>。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> &#123;</span><br><span class="line">    <span class="keyword">select</span> &#123;</span><br><span class="line">        <span class="keyword">case</span> now = &lt;-timer.C:</span><br><span class="line">            <span class="comment">// ...</span></span><br><span class="line">        </span><br><span class="line">        <span class="keyword">case</span> newEntry := &lt;-c.add:</span><br><span class="line">            <span class="comment">// ...</span></span><br><span class="line">        </span><br><span class="line">        <span class="keyword">case</span> replyChan := &lt;-c.snapshot:</span><br><span class="line">            <span class="comment">// ...</span></span><br><span class="line">            <span class="keyword">continue</span></span><br><span class="line">        </span><br><span class="line">        <span class="keyword">case</span> &lt;-c.stop:</span><br><span class="line">            <span class="comment">// ...</span></span><br><span class="line">            <span class="keyword">return</span></span><br><span class="line">        </span><br><span class="line">        <span class="keyword">case</span> id := &lt;-c.remove:</span><br><span class="line">           <span class="comment">// ...</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">break</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>下面我们分开看对每一种信号的处理：</p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="对-timer-C-的处理"><a href="#对-timer-C-的处理" class="headerlink" title="对 timer.C 的处理"></a>对 timer.C 的处理</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> now = &lt;-timer.C:</span><br><span class="line">    now = now.In(c.location)</span><br><span class="line">    c.logger.Info(<span class="string">&quot;wake&quot;</span>, <span class="string">&quot;now&quot;</span>, now)</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Run every entry whose next time was less than now</span></span><br><span class="line">    <span class="keyword">for</span> _, e := <span class="keyword">range</span> c.entries &#123;</span><br><span class="line">        <span class="keyword">if</span> e.Next.After(now) || e.Next.IsZero() &#123;</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line">        &#125;</span><br><span class="line">        c.startJob(e.WrappedJob)</span><br><span class="line">        e.Prev = e.Next</span><br><span class="line">        e.Next = e.Schedule.Next(now)</span><br><span class="line">        c.logger.Info(<span class="string">&quot;run&quot;</span>, <span class="string">&quot;now&quot;</span>, now, <span class="string">&quot;entry&quot;</span>, e.ID, <span class="string">&quot;next&quot;</span>, e.Next)</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个信号被触发有两种情况：</p>
+<ol>
+<li>排序后 entries 中第 0 位的作业可以被执行了。</li>
+<li>休眠了十万小时后，定时器被触发…..</li>
+</ol>
+<p>在处理这类信号时，run 会遍历所有的 entries, 因为这些作业都是按下一次执行时间排过序的，所以如果因为第一种情况出发了信号，说明至少有一个作业是可以执行的，我们遍历整个 entries，直到遇到一个作业可执行时间大于当前时间，说明前面遍历到的都是可以执行的，后面的都是不可以执行的；如果因为第二种情况发出来这个信号，则在第一次判断时就会 break</p>
+<p>执行作业调用了 <code>cron.startJob()</code> 方法，这个方法会为每个作业开启一个 goroutine 去执行用户函数：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *Cron)</span></span> startJob(j Job) &#123;</span><br><span class="line">	c.jobWaiter.Add(<span class="number">1</span>)</span><br><span class="line">	<span class="keyword">go</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">		<span class="keyword">defer</span> c.jobWaiter.Done()</span><br><span class="line">		j.Run()</span><br><span class="line">	&#125;()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里的操作简单粗暴，直接开 goroutine 去执行，在使用时要注意定时任务一定要能结束，定时任务执行时间过长且执行速率很高时，可能造成 goroutine 泄露，进而可能导致内存溢出。</p>
+<p>还有关于 <code>jobWaiter</code>，他是为了通知用户程序 Cron 什么时候真的结束了，结合 <code>Stop()</code> 可以理解。</p>
+<h3 id="对-c-add-的处理"><a href="#对-c-add-的处理" class="headerlink" title="对 c.add 的处理"></a>对 c.add 的处理</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> newEntry := &lt;-c.add:</span><br><span class="line">    timer.Stop()</span><br><span class="line">    now = c.now()</span><br><span class="line">    newEntry.Next = newEntry.Schedule.Next(now)</span><br><span class="line">    c.entries = <span class="built_in">append</span>(c.entries, newEntry)</span><br><span class="line">    c.logger.Info(<span class="string">&quot;added&quot;</span>, <span class="string">&quot;now&quot;</span>, now, <span class="string">&quot;entry&quot;</span>, newEntry.ID, <span class="string">&quot;next&quot;</span>, newEntry.Next)</span><br></pre></td></tr></table></figure>
+
+<p>如果 cron 在运行的过程中有作业被加入，会停止定时器（新加入的作业需要重新进行排序），然后计算新作业的下一次执行时间（cron 未运行时添加作业没有这一步，是因为在 Start 的第一步会集中计算，集中计算结束后，进入第二步的死循环，就不会再次集中计算了），最后把新作业加入到 entries 列表中。</p>
+<h3 id="对-c-snapshot-的处理"><a href="#对-c-snapshot-的处理" class="headerlink" title="对 c.snapshot 的处理"></a>对 c.snapshot 的处理</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> replyChan := &lt;-c.snapshot:</span><br><span class="line">    replyChan &lt;- c.entrySnapshot()</span><br><span class="line">    <span class="keyword">continue</span></span><br></pre></td></tr></table></figure>
+
+<p>上面已经说过这个信号，如果 Cron 在运行过程中，用户请求获取作业快照会触发这个信号，之所以不在 <code>Entries()</code> 中直接返回，是因为一旦 Cron 被启动，entries 列表中的元素就会被不断排序，而这个操作是在另一个 goroutine 中进行的，这就可能导致直接返回的数据是脏数据。</p>
+<p>另外，请注意这个 <code>continue</code>, 如果没有 <code>continue</code>, 这个 <code>case</code> 执行完后，<code>select</code> 会退出，接着执行 <code>break</code>, 这可能导致与 <code>c.snapshot</code> 同时满足的其他事件不被执行；可以说，<code>select</code> 外层的那个 <code>for</code> 就是未这种情况存在的。</p>
+<p>那为什么只有 <code>c.snapshot</code> 需要 <code>continue</code> 呢？其实这个 <code>select</code>  最终的目的是让 <code>run</code> 重新阻塞等待下一个事件信号，其他几个不重新阻塞，原因在于他们执行完后需要对 entries 重新排序，而快照不需要，仔细对比 <code>c.add</code> 和 <code>c.snapshot</code>, 就会恍然大悟。</p>
+<h3 id="对-c-stop-的处理"><a href="#对-c-stop-的处理" class="headerlink" title="对 c.stop 的处理"></a>对 c.stop 的处理</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> &lt;-c.stop:</span><br><span class="line">    timer.Stop()</span><br><span class="line">    c.logger.Info(<span class="string">&quot;stop&quot;</span>)</span><br><span class="line">    <span class="keyword">return</span></span><br></pre></td></tr></table></figure>
+
+<p>这就很简单了，停止定时器，结束 <code>run</code> goroutine, 因为作业的执行在自己单独的 goroutine 中，所以 <code>run()</code> goroutine 的返回不会影响他们。</p>
+<h3 id="对-c-remove-的处理"><a href="#对-c-remove-的处理" class="headerlink" title="对 c.remove 的处理"></a>对 c.remove 的处理</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> id := &lt;-c.remove:</span><br><span class="line">    timer.Stop()</span><br><span class="line">    now = c.now()</span><br><span class="line">    c.removeEntry(id)</span><br><span class="line">    c.logger.Info(<span class="string">&quot;removed&quot;</span>, <span class="string">&quot;entry&quot;</span>, id)</span><br></pre></td></tr></table></figure>
+
+<p>逻辑和 <code>c,add</code> 是一样的。</p>
+<h2 id="Option"><a href="#Option" class="headerlink" title="Option"></a>Option</h2><p>开头说过，<code>New()</code> 时可以接收一组 <code>option</code> 参数，用以改变 Cron 的默认行为，这些参数其实是一些函数，他们会在 Cron 初始化后被依次执行，Cron 内置了一些函数, 他们会返回 <code>Option</code> 类型的函数，下面简单了解一些这些函数的作用：</p>
+<h3 id="WithLocation"><a href="#WithLocation" class="headerlink" title="WithLocation"></a>WithLocation</h3><p>用于改变时区，默认情况下通过 <code>time.Local</code> 获取</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">WithLocation</span><span class="params">(loc *time.Location)</span></span> Option &#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="function"><span class="keyword">func</span><span class="params">(c *Cron)</span></span> &#123;</span><br><span class="line">		c.location = loc</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以这样使用:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">c := cron.New(cron.WithLocation(nyc))</span><br></pre></td></tr></table></figure>
+
+<h3 id="WithSeconds"><a href="#WithSeconds" class="headerlink" title="WithSeconds"></a>WithSeconds</h3><p>用于覆盖默认的 Cron 解析格式，默认的格式是 <code>分钟 小时 日 月 星期</code>，也就是 <code>Minute | Hour | Dom | Month | Dow</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">WithSeconds</span><span class="params">()</span></span> Option &#123;</span><br><span class="line">	<span class="keyword">return</span> WithParser(NewParser(</span><br><span class="line">		Second | Minute | Hour | Dom | Month | Dow | Descriptor,</span><br><span class="line">	))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>允许的字段如下：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> (</span><br><span class="line">	Second         ParseOption = <span class="number">1</span> &lt;&lt; <span class="literal">iota</span> <span class="comment">// Seconds field, default 0</span></span><br><span class="line">	SecondOptional                         <span class="comment">// Optional seconds field, default 0</span></span><br><span class="line">	Minute                                 <span class="comment">// Minutes field, default 0</span></span><br><span class="line">	Hour                                   <span class="comment">// Hours field, default 0</span></span><br><span class="line">	Dom                                    <span class="comment">// Day of month field, default *</span></span><br><span class="line">	Month                                  <span class="comment">// Month field, default *</span></span><br><span class="line">	Dow                                    <span class="comment">// Day of week field, default *</span></span><br><span class="line">	DowOptional                            <span class="comment">// Optional day of week field, default *</span></span><br><span class="line">	Descriptor                             <span class="comment">// Allow descriptors such as @monthly, @weekly, etc.</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<h3 id="WithParser"><a href="#WithParser" class="headerlink" title="WithParser"></a>WithParser</h3><p>如果你觉得 Cron 表达式是在难以理解，也记不住，可以写一个自己的解析器，用这个函数替代原来的解析器。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">WithParser</span><span class="params">(p ScheduleParser)</span></span> Option &#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="function"><span class="keyword">func</span><span class="params">(c *Cron)</span></span> &#123;</span><br><span class="line">		c.parser = p</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="WithChain"><a href="#WithChain" class="headerlink" title="WithChain"></a>WithChain</h3><p>修改默认修饰器</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">WithChain</span><span class="params">(wrappers ...JobWrapper)</span></span> Option &#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="function"><span class="keyword">func</span><span class="params">(c *Cron)</span></span> &#123;</span><br><span class="line">		c.chain = NewChain(wrappers...)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="WihLogger"><a href="#WihLogger" class="headerlink" title="WihLogger"></a>WihLogger</h3><p>使用自定义的 logger</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">WithLogger</span><span class="params">(logger Logger)</span></span> Option &#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="function"><span class="keyword">func</span><span class="params">(c *Cron)</span></span> &#123;</span><br><span class="line">		c.logger = logger</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="Chain"><a href="#Chain" class="headerlink" title="Chain"></a>Chain</h2><p>这是一个很值得学习的装饰器模式，我们先看一下默认情况下，装饰器是怎么工作的：</p>
+<p>Cron 结构体只有一个 Chain 类型的 <code>chain</code> 字段，该字段在执行 <code>New()</code> 时会通过 <code>NewChain()</code> 初始化：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">c := &amp;Cron&#123;</span><br><span class="line">    entries:   <span class="literal">nil</span>,</span><br><span class="line">    chain:     NewChain(),</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个 <code>NewChain()</code> 接收一组装饰器函数，并且会用这些函数初始化一个 Chain 对象返回:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Chain <span class="keyword">struct</span> &#123;</span><br><span class="line">	wrappers []JobWrapper</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewChain</span><span class="params">(c ...JobWrapper)</span></span> Chain &#123;</span><br><span class="line">	<span class="keyword">return</span> Chain&#123;c&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>每个 <code>Entry</code> 结构体持有一个 <code>WrappedJob Job</code> 属性，在 <code>Schedule()</code> 中初始化时，会调用 <code>chain</code> 的 <code>Than()</code> 方法初始化：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">entry := &amp;Entry&#123;</span><br><span class="line">    ID:         c.nextID,</span><br><span class="line">    Schedule:   schedule,</span><br><span class="line">    WrappedJob: c.chain.Then(cmd),</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在 <code>Then()</code> 中，这些装饰器会被执行：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c Chain)</span></span> Then(j Job) Job &#123;</span><br><span class="line">	<span class="keyword">for</span> i := <span class="keyword">range</span> c.wrappers &#123;</span><br><span class="line">		j = c.wrappers[<span class="built_in">len</span>(c.wrappers)-i<span class="number">-1</span>](j)</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> j</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>Then()</code> 返回的是执行完装饰器之后的 Job(被装饰后的 Job), 这也解释了为什么在 <code>run()</code> 中，传递给 <code>startJob()</code> 的是 <code>e.WrappedJob</code> 而不是 <code>e.job</code>.</p>
+<p>了解了装饰器是如何工作的，我们再来看 <code>chain.go</code> 中提供的三个内置装饰器</p>
+<h3 id="Recover"><a href="#Recover" class="headerlink" title="Recover"></a>Recover</h3><p>类似于内置的 <code>recover()</code>，它会捕捉运行过程中的 panic，并使用提供的 logger 记录下来，其实做的事情就是往用户的 Job 里插入了一个 <code>defer func()&#123;&#125;()</code></p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Recover</span><span class="params">(logger Logger)</span></span> JobWrapper &#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="function"><span class="keyword">func</span><span class="params">(j Job)</span></span> Job &#123;</span><br><span class="line">		<span class="keyword">return</span> FuncJob(<span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">			<span class="keyword">defer</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">				<span class="keyword">if</span> r := <span class="built_in">recover</span>(); r != <span class="literal">nil</span> &#123;</span><br><span class="line">					<span class="keyword">const</span> size = <span class="number">64</span> &lt;&lt; <span class="number">10</span></span><br><span class="line">					buf := <span class="built_in">make</span>([]<span class="type">byte</span>, size)</span><br><span class="line">					buf = buf[:runtime.Stack(buf, <span class="literal">false</span>)]</span><br><span class="line">					err, ok := r.(<span class="type">error</span>)</span><br><span class="line">					<span class="keyword">if</span> !ok &#123;</span><br><span class="line">						err = fmt.Errorf(<span class="string">&quot;%v&quot;</span>, r)</span><br><span class="line">					&#125;</span><br><span class="line">					logger.Error(err, <span class="string">&quot;panic&quot;</span>, <span class="string">&quot;stack&quot;</span>, <span class="string">&quot;...\n&quot;</span>+<span class="type">string</span>(buf))</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;()</span><br><span class="line">			j.Run()</span><br><span class="line">		&#125;)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="DelayIfStillRunning"><a href="#DelayIfStillRunning" class="headerlink" title="DelayIfStillRunning"></a>DelayIfStillRunning</h3><p>这个装饰器的作用是保证一个 Job 的前一次执行完，后一次才执行，比如有一个 Job 需要执行 10s, 但执行频率是一秒一次，如果我们想要保证同时只有一个相同的 Job 被执行，就可以使用这个装饰器，在实现上，他是为每个 Job 添加了一个排它锁实现的，Job 执行前获取该锁，退出时释放锁，当一个 Job 等待该锁的时间大于一分钟，会记录在日志中，设计很巧妙。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">DelayIfStillRunning</span><span class="params">(logger Logger)</span></span> JobWrapper &#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="function"><span class="keyword">func</span><span class="params">(j Job)</span></span> Job &#123;</span><br><span class="line">		<span class="keyword">var</span> mu sync.Mutex</span><br><span class="line">		<span class="keyword">return</span> FuncJob(<span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">			start := time.Now()</span><br><span class="line">			mu.Lock()</span><br><span class="line">			<span class="keyword">defer</span> mu.Unlock()</span><br><span class="line">			<span class="keyword">if</span> dur := time.Since(start); dur &gt; time.Minute &#123;</span><br><span class="line">				logger.Info(<span class="string">&quot;delay&quot;</span>, <span class="string">&quot;duration&quot;</span>, dur)</span><br><span class="line">			&#125;</span><br><span class="line">			j.Run()</span><br><span class="line">		&#125;)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="SkipIfStillRunning"><a href="#SkipIfStillRunning" class="headerlink" title="SkipIfStillRunning"></a>SkipIfStillRunning</h3><p>上面那个是等待执行完，这个是如果上一个还在执行，就直接跳过，在实现上，这个装饰器使用了一个容量为 1 的 chan, 在执行 Job 前，会消费 chan 里的数据，执行完后，再往 chan 里填一个数据，通过 select 监听 chan, 如果里面有数据，则执行，否则说明上一个还在执行，只打印一个日志就好了。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">SkipIfStillRunning</span><span class="params">(logger Logger)</span></span> JobWrapper &#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="function"><span class="keyword">func</span><span class="params">(j Job)</span></span> Job &#123;</span><br><span class="line">		<span class="keyword">var</span> ch = <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;, <span class="number">1</span>)</span><br><span class="line">		ch &lt;- <span class="keyword">struct</span>&#123;&#125;&#123;&#125;</span><br><span class="line">		<span class="keyword">return</span> FuncJob(<span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123;</span><br><span class="line">			<span class="keyword">select</span> &#123;</span><br><span class="line">			<span class="keyword">case</span> v := &lt;-ch:</span><br><span class="line">				<span class="keyword">defer</span> <span class="function"><span class="keyword">func</span><span class="params">()</span></span> &#123; ch &lt;- v &#125;()</span><br><span class="line">				j.Run()</span><br><span class="line">			<span class="keyword">default</span>:</span><br><span class="line">				logger.Info(<span class="string">&quot;skip&quot;</span>)</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="总结-1"><a href="#总结-1" class="headerlink" title="总结"></a>总结</h2><p>Cron 的几个特点：</p>
+<ol>
+<li>允许在允许中添加或删除 Job：通过 chan 发送信号，select 监听，重新排序。</li>
+<li>装饰器机制：允许给 Job 添加装饰器，装饰器会在 Entry 初始化时执行。</li>
+<li>低耦合：<code>New()</code> 时可以传递 <code>Option</code>, 以此可以改变一些默认行为，如可以实现自己的 cron 解释器。</li>
+<li>每个 Job 使用单独的 goroutine 执行。</li>
+<li>Stop Cron 不会停止已经开始执行但为执行完的 Job, 可以通过 <code>Context</code> 得知什么时候执行完了。</li>
+</ol>
+
+      
+    </div>
+
+  </div>
+
+  <div class="article-footer">
+    <div class="article-meta pull-left">
+
+    
+      
+
+    <span class="post-categories">
+      <i class="icon-categories"></i>
+        <a href="/categories/Go/">Go</a>
+    </span>
+    
+
+    
+    
+
+    <span class="post-tags">
+      <i class="icon-tags"></i>
+        <a href="/tags/go/">go</a>
+    </span>
+    
+
+    </div>
+
+    
+  </div>
+</article>
+
+  
+
+
+
+
+
+
+
+
+
+    </main>
+
+    <footer class="site-footer">
+  <p class="site-info">
+    Proudly powered by <a href="https://hexo.io/" target="_blank">Hexo</a> and
+    Theme by <a href="https://github.com/520MianXiangDuiXiang520/Hacker" target="_blank">Hacker</a>
+    </br>
+    
+    &copy; 2024 Junebao
+    
+  </p>
+</footer>
+    
+    
+  </div>
+</div>
+</body>
+</html>

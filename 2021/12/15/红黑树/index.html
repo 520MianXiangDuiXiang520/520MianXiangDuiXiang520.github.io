@@ -1,0 +1,243 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>红黑树 | Junebao</title>
+
+  
+  <meta name="author" content="Junebao">
+  
+
+  
+  <meta name="description" content="红黑树实质上是一棵自平衡的二叉查找树，引入带颜色的节点也是为了方便在进行插入或删除操作时，如果破坏了二叉查找树的平衡性能通过一系列变换保持平衡。">
+  
+
+  
+  
+  <meta name="keywords" content="算法">
+  
+
+  <meta id="viewport" name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  <meta property="og:title" content="红黑树"/>
+
+  <meta property="og:site_name" content="Junebao"/>
+
+  
+  <meta property="og:image" content="/favicon.ico"/>
+  
+
+  <link href="/favicon.ico" rel="icon">
+  <link rel="alternate" href="/atom.xml" title="Junebao" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+<div class="blog">
+  <div class="content">
+
+    <header>
+  <div class="site-branding">
+    <h1 class="site-title">
+      <a href="/">Junebao</a>
+    </h1>
+    <p class="site-description"></p>
+  </div>
+  <nav class="site-navigation">
+    <ul>
+      
+        
+          <li><a class="menu-uncover-a" href="/">主页</li>
+        
+      
+        
+          <li><a class="menu-uncover-a" href="/archives">归档</li>
+        
+      
+        
+          <li><a class="menu-uncover-a" href="/tags">标签</li>
+        
+      
+        
+          <li><a class="menu-uncover-a" href="/about">关于</li>
+        
+      
+    </ul>
+  </nav>
+</header>
+
+    <main class="site-main posts-loop">
+    <article>
+
+  
+    
+    <h3 class="article-title"><span>红黑树</span></h3>
+    
+  
+
+  <div class="article-top-meta">
+    <span class="posted-on">
+      <a href="/2021/12/15/红黑树/" rel="bookmark">
+        <time class="entry-date published" datetime="2021-12-15T04:55:15.000Z">
+          2021-12-15
+        </time>
+      </a>
+    </span>
+  </div>
+
+
+  
+
+  <div class="article-content">
+    <div class="entry">
+      
+        <p>红黑树实质上是一棵自平衡的二叉查找树，引入带颜色的节点也是为了方便在进行插入或删除操作时，如果破坏了二叉查找树的平衡性能通过一系列变换保持平衡。</p>
+<span id="more"></span>
+
+<h2 id="红黑树的性质"><a href="#红黑树的性质" class="headerlink" title="红黑树的性质"></a>红黑树的性质</h2><ol>
+<li>每个节点要么是红色，要么是黑色</li>
+<li>根节点必须是黑色</li>
+<li>两个红色节点不能相连</li>
+<li>从根节点出发到达任意叶子节点经过的黑色节点个数相同</li>
+</ol>
+<h2 id="红黑树的数据结构"><a href="#红黑树的数据结构" class="headerlink" title="红黑树的数据结构"></a>红黑树的数据结构</h2><p>红黑树实质上是一颗二叉查找树，左子树的值小于根节点的值，右子树的值大于根节点的值。</p>
+<p><img src="/image/%E7%BA%A2%E9%BB%91%E6%A0%91/image-20200405220949475.png" alt="image-20200405220949475"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">RedBlackTree</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="type">int</span> <span class="variable">BLACK</span> <span class="operator">=</span> <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">int</span> <span class="variable">RED</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Node root;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">Node</span> &#123;</span><br><span class="line">        <span class="keyword">private</span> <span class="type">int</span> <span class="variable">color</span> <span class="operator">=</span> RED;</span><br><span class="line">        <span class="keyword">private</span> <span class="type">int</span> data;</span><br><span class="line">        <span class="keyword">private</span> Node left;</span><br><span class="line">        <span class="keyword">private</span> Node right;</span><br><span class="line">        <span class="keyword">private</span> Node parent;</span><br><span class="line"></span><br><span class="line">        Node(<span class="type">int</span> data) &#123;</span><br><span class="line">            <span class="built_in">this</span>.data = data;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="红黑树的插入"><a href="#红黑树的插入" class="headerlink" title="红黑树的插入"></a>红黑树的插入</h2><p>插入的节点默认是红色的（要不然全是黑色节点它也满足红黑树的定义，不过就没意义了）；</p>
+<p>由于红黑树是一颗二叉查找树，所以它的插入可以使用递归（先不考虑破坏红黑树的结构）</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 通过递归往红黑树中插入一个新节点</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> root 要插入的树的根节点</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> data 新节点的值</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">insert</span><span class="params">(Node root, <span class="type">int</span> data)</span> &#123;</span><br><span class="line">    <span class="keyword">if</span>(root.data &gt; data) &#123;</span><br><span class="line">        <span class="keyword">if</span>(root.left == <span class="literal">null</span>) &#123;</span><br><span class="line">            <span class="type">Node</span> <span class="variable">node</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Node</span>(data);</span><br><span class="line">            root.left = node;</span><br><span class="line">            node.parent = root;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            insert(root.left, data);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;<span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">if</span>(root.right == <span class="literal">null</span>) &#123;</span><br><span class="line">            <span class="type">Node</span> <span class="variable">node</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Node</span>(data);</span><br><span class="line">            root.right = node;</span><br><span class="line">            node.parent = root;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            insert(root.right, data);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="调整结构"><a href="#调整结构" class="headerlink" title="调整结构"></a>调整结构</h3><p>新插入节点后，可能破坏红黑树的定义，虽然红黑树的定义有四条，前两条都是确定了的，不会因为新添加节点而被破坏，只需要关注第三条就可以了（满足前三条第四条就会自然满足）</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 判断插入新节点后红黑树结构是否需要变化</span></span><br><span class="line"><span class="comment"> * 根据红黑树的定义，两个红色节点不能连接</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> root 插入的新节点</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span> 返回true表示插入新节点后破坏了红黑树的结构，</span></span><br><span class="line"><span class="comment"> *         需要通过旋转变色来纠正，否则不需要修改。</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">private</span> <span class="type">boolean</span> <span class="title function_">checkStruct</span><span class="params">(Node root)</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> root.color == RED &amp;&amp; root.parent.color == RED;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>所以只要新插入的节点的父节点是红色，就需要调整结构。调整结构的办法有三种：</p>
+<h4 id="1-变色"><a href="#1-变色" class="headerlink" title="1. 变色"></a>1. 变色</h4><p>就是把红色变为黑色，黑色变为红色</p>
+<h4 id="2-左旋"><a href="#2-左旋" class="headerlink" title="2. 左旋"></a>2. 左旋</h4><p><img src="/image/%E7%BA%A2%E9%BB%91%E6%A0%91/image-20200405224519221.png" alt="image-20200405224519221"></p>
+<p>以节点C为轴左旋的步骤：</p>
+<ol>
+<li>将C的父节点A沉下来，C升上去作为新的父节点</li>
+<li>将原来C的左子树挂到A的右子树上</li>
+<li>其他不变</li>
+</ol>
+<p><img src="/image/%E7%BA%A2%E9%BB%91%E6%A0%91/leftSpin.gif"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 左旋</span></span><br><span class="line"><span class="comment"> *   - 旋转前的右子节点变成旋转后的父节点</span></span><br><span class="line"><span class="comment"> *   - 旋转前的父节点（轴）变为旋转后父节点的左子节点</span></span><br><span class="line"><span class="comment"> *   - 旋转前轴的右子节点的右子节点旋转后变为轴的右子节点</span></span><br><span class="line"><span class="comment"> *   - 旋转前右子节点的左子树变成旋转后左子节点的右子树</span></span><br><span class="line"><span class="comment"> *   - 其他不变</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> node 以该节点为轴旋转</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">leftSpin</span><span class="params">(Node node)</span> &#123;</span><br><span class="line">    <span class="type">Node</span> <span class="variable">nextFather</span> <span class="operator">=</span> node.right;</span><br><span class="line">    nextFather.parent = node.parent;</span><br><span class="line">    node.right = node.right.left;</span><br><span class="line">    nextFather.left = node;</span><br><span class="line">    connectParent(node, nextFather);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="3-右旋"><a href="#3-右旋" class="headerlink" title="3. 右旋"></a>3. 右旋</h4><p>右旋和左旋正好相反</p>
+<p><img src="/image/%E7%BA%A2%E9%BB%91%E6%A0%91/image-20200405225547906.png" alt="image-20200405225547906"></p>
+<p>以B为轴右旋的步骤：</p>
+<ol>
+<li>将B的父节点A沉下来，B升上去作为新的父节点</li>
+<li>将原来B的右子树接到新的A的左子树的位置</li>
+</ol>
+<p><img src="/image/%E7%BA%A2%E9%BB%91%E6%A0%91/rightSpin.gif"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">      <span class="comment">/**</span></span><br><span class="line"><span class="comment">       * 将变换后的树和它上面的节点连接</span></span><br><span class="line"><span class="comment">       * <span class="doctag">@param</span> node 变换前的轴</span></span><br><span class="line"><span class="comment">       * <span class="doctag">@param</span> nextFather 变换后的子树</span></span><br><span class="line"><span class="comment">       */</span></span><br><span class="line">      <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">connectParent</span><span class="params">(Node node, Node nextFather)</span> &#123;</span><br><span class="line">          <span class="comment">// 如果变换的是根节点，就把root赋值成变换后的节点</span></span><br><span class="line">          <span class="keyword">if</span>(node.parent != <span class="literal">null</span>) &#123;</span><br><span class="line">              <span class="keyword">if</span>(node.parent.data &gt; node.data) &#123;</span><br><span class="line">                  node.parent.left = nextFather;</span><br><span class="line">              &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                  node.parent.right = nextFather;</span><br><span class="line">              &#125;</span><br><span class="line">          &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">              RedBlackTree.root = nextFather;</span><br><span class="line">          &#125;</span><br><span class="line">          node.parent = nextFather;</span><br><span class="line">      &#125;        </span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">       * 右旋</span></span><br><span class="line"><span class="comment">       *   - 旋转前的左子节点变成旋转后的父节点</span></span><br><span class="line"><span class="comment">       *   - 旋转前左子节点的右子树变成旋转后右子节点的左子树</span></span><br><span class="line"><span class="comment">       * <span class="doctag">@param</span> node 旋转轴。</span></span><br><span class="line"><span class="comment">       */</span></span><br><span class="line">      <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">rightSpin</span><span class="params">(Node node)</span> &#123;</span><br><span class="line">          <span class="type">Node</span> <span class="variable">nextFather</span> <span class="operator">=</span> node.left;</span><br><span class="line">          nextFather.parent = node.parent;</span><br><span class="line">          node.left = node.left.right;</span><br><span class="line">          nextFather.right = node;</span><br><span class="line">          connectParent(node, nextFather);</span><br><span class="line">      &#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>根据新插入节点位置的不同情况，节点调整有五种不同的方案：</p>
+<h3 id="1-父节点和叔叔节点均为红色"><a href="#1-父节点和叔叔节点均为红色" class="headerlink" title="1. 父节点和叔叔节点均为红色"></a>1. 父节点和叔叔节点均为红色</h3><p>如果新插入节点的父节点和叔叔节点都是红色，只需要将父节点和叔叔节点变为黑色，祖父节点变为红色即可。</p>
+<p><img src="/image/%E7%BA%A2%E9%BB%91%E6%A0%91/image-20200405222923406.png" alt="image-20200405222923406"></p>
+<p>如果祖父节点是根节点，祖父节点保持黑色。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">ONLY_CHANGE_COLOR &#123;</span><br><span class="line">            <span class="comment">/**</span></span><br><span class="line"><span class="comment">             * 适用于：</span></span><br><span class="line"><span class="comment">             *   - 父节点和叔叔节点都为红色的情况；</span></span><br><span class="line"><span class="comment">             * 具体方法：</span></span><br><span class="line"><span class="comment">             *   - 把父节点和叔叔节点的颜色变为黑色，</span></span><br><span class="line"><span class="comment">             *   - 爷爷节点的颜色变为红色</span></span><br><span class="line"><span class="comment">             *   - 如果爷爷节点为根节点，爷爷节点颜色恢复黑色</span></span><br><span class="line"><span class="comment">             * <span class="doctag">@param</span> node 当前新修改的节点</span></span><br><span class="line"><span class="comment">             */</span></span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">way</span><span class="params">(Node node)</span> &#123;</span><br><span class="line">                node.parent.parent.left.color = BLACK;</span><br><span class="line">                node.parent.parent.right.color = BLACK;</span><br><span class="line">                <span class="keyword">if</span>(node.parent.parent.parent != <span class="literal">null</span>)&#123;</span><br><span class="line">                    node.parent.parent.color = RED;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;,</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-叔叔节点不存在或为黑色，父节点位于祖父节点的左子树"><a href="#2-叔叔节点不存在或为黑色，父节点位于祖父节点的左子树" class="headerlink" title="2.  叔叔节点不存在或为黑色，父节点位于祖父节点的左子树"></a>2.  叔叔节点不存在或为黑色，父节点位于祖父节点的左子树</h3><p><img src="/image/%E7%BA%A2%E9%BB%91%E6%A0%91/image-20200405223524275.png" alt="image-20200405223524275"></p>
+<h4 id="2-1-当前节点位于左子树"><a href="#2-1-当前节点位于左子树" class="headerlink" title="2.1 当前节点位于左子树"></a>2.1 当前节点位于左子树</h4><p>调整办法：</p>
+<ol>
+<li>将父节点设置为黑色</li>
+<li>经祖父节点设置为红色</li>
+<li>对祖父节点进行右旋</li>
+</ol>
+<p><img src="/image/%E7%BA%A2%E9%BB%91%E6%A0%91/image-20200405230611554.png" alt="image-20200405230611554"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">RIGHT_SPIN_CHANGE_COLOR &#123;</span><br><span class="line">           <span class="comment">/**</span></span><br><span class="line"><span class="comment">            * 适用于：</span></span><br><span class="line"><span class="comment">            *   - 无叔叔节点或叔叔节点为黑色</span></span><br><span class="line"><span class="comment">            *   - 父节点位于祖父节点的左子树</span></span><br><span class="line"><span class="comment">            *   - 新节点位于父节点左子树的情况</span></span><br><span class="line"><span class="comment">            * 具体方法：</span></span><br><span class="line"><span class="comment">            *   - 将当前节点的父节点设置为黑色</span></span><br><span class="line"><span class="comment">            *   - 将当前节点的祖父节点设置为红色</span></span><br><span class="line"><span class="comment">            *   - 对祖父节点进行右旋</span></span><br><span class="line"><span class="comment">            * <span class="doctag">@param</span> node 当前节点</span></span><br><span class="line"><span class="comment">            */</span></span><br><span class="line">           <span class="meta">@Override</span></span><br><span class="line">           <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">way</span><span class="params">(Node node)</span> &#123;</span><br><span class="line">               node.parent.color = BLACK;</span><br><span class="line">               node.parent.parent.color = RED;</span><br><span class="line">               Solution.rightSpin(node.parent.parent);</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;,</span><br></pre></td></tr></table></figure>
+
+<h5 id="2-2-当前节点位于右子树"><a href="#2-2-当前节点位于右子树" class="headerlink" title="2.2 当前节点位于右子树"></a>2.2 当前节点位于右子树</h5><p>如果当前节点位于右子树，需要先对它的父节点进行左旋得到2.1的情况，再按2.1进行变换</p>
+<p><img src="/image/%E7%BA%A2%E9%BB%91%E6%A0%91/image-20200405233128270.png" alt="image-20200405233128270"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">LEFT_SPIN_WITH_RIGHT_SPIN &#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 适用于：</span></span><br><span class="line"><span class="comment">     *   - 无叔叔节点或叔叔节点为黑色</span></span><br><span class="line"><span class="comment">     *   - 父节点位于祖父节点的左子树</span></span><br><span class="line"><span class="comment">     *   - 新节点位于父节点右子树的情况</span></span><br><span class="line"><span class="comment">     * 具体方法：</span></span><br><span class="line"><span class="comment">     *   - 对当前节点的父节点进行左旋</span></span><br><span class="line"><span class="comment">     *   - 执行 RIGHT_SPIN_CHANGE_COLOR</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> node 当前节点</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">way</span><span class="params">(Node node)</span> &#123;</span><br><span class="line">        Solution.leftSpin(node.parent);</span><br><span class="line">        RIGHT_SPIN_CHANGE_COLOR.way(node.left);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-叔叔节点不存在或为黑色，父节点在祖父节点的右子树"><a href="#3-叔叔节点不存在或为黑色，父节点在祖父节点的右子树" class="headerlink" title="3.叔叔节点不存在或为黑色，父节点在祖父节点的右子树"></a>3.叔叔节点不存在或为黑色，父节点在祖父节点的右子树</h3><p>与上面的情况正好相反</p>
+<p><img src="/image/%E7%BA%A2%E9%BB%91%E6%A0%91/image-20200406090531344.png" alt="image-20200406090531344"></p>
+<h4 id="3-1-当前节点位于父节点的右子树上"><a href="#3-1-当前节点位于父节点的右子树上" class="headerlink" title="3.1 当前节点位于父节点的右子树上"></a>3.1 当前节点位于父节点的右子树上</h4><p>调整步骤：</p>
+<ol>
+<li>将父节点变为黑色</li>
+<li>将祖父节点变为红色</li>
+<li>对祖父节点左旋</li>
+</ol>
+<p><img src="/image/%E7%BA%A2%E9%BB%91%E6%A0%91/image-20200406091144198.png" alt="image-20200406091144198"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">LEFT_SPIN_CHANGE_COLOR &#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 适用于：</span></span><br><span class="line"><span class="comment">     *   - 无叔叔节点或叔叔节点为黑色</span></span><br><span class="line"><span class="comment">     *   - 父节点位于祖父节点的右子树</span></span><br><span class="line"><span class="comment">     *   - 新节点位于父节点右子树的情况</span></span><br><span class="line"><span class="comment">     * 具体方法：</span></span><br><span class="line"><span class="comment">     *   - 将当前节点的父节点设置为黑色</span></span><br><span class="line"><span class="comment">     *   - 将当前节点的祖父节点设置为红色</span></span><br><span class="line"><span class="comment">     *   - 对祖父节点进行左旋</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> node 当前节点</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">way</span><span class="params">(Node node)</span> &#123;</span><br><span class="line">        node.parent.color = BLACK;</span><br><span class="line">        node.parent.parent.color = RED;</span><br><span class="line">        Solution.leftSpin(node.parent.parent);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure>
+
+<h4 id="3-2-当前节点位于左子树"><a href="#3-2-当前节点位于左子树" class="headerlink" title="3.2 当前节点位于左子树"></a>3.2 当前节点位于左子树</h4><p>调整步骤：</p>
+<ol>
+<li>对当前节点的父节点进行右旋</li>
+<li>执行3.1的步骤</li>
+</ol>
+<p><img src="/image/%E7%BA%A2%E9%BB%91%E6%A0%91/image-20200406091905873.png" alt="image-20200406091905873"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">RIGHT_SPIN_LEFT_SPIN &#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 适用于：</span></span><br><span class="line"><span class="comment">     *   - 无叔叔节点或叔叔节点为黑色</span></span><br><span class="line"><span class="comment">     *   - 父节点位于祖父节点的右子树</span></span><br><span class="line"><span class="comment">     *   - 新节点位于父节点左子树的情况</span></span><br><span class="line"><span class="comment">     * 具体方法：</span></span><br><span class="line"><span class="comment">     *   - 对当前节点的父节点进行右旋</span></span><br><span class="line"><span class="comment">     *   - 执行 LEFT_SPIN_CHANGE_COLOR</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> node 当前节点</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">way</span><span class="params">(Node node)</span> &#123;</span><br><span class="line">        Solution.rightSpin(node.parent);</span><br><span class="line">        LEFT_SPIN_CHANGE_COLOR.way(node.right);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+
+  </div>
+
+  <div class="article-footer">
+    <div class="article-meta pull-left">
+
+    
+      
+
+    <span class="post-categories">
+      <i class="icon-categories"></i>
+        <a href="/categories/算法/">算法</a>
+    </span>
+    
+
+    
+    
+
+    <span class="post-tags">
+      <i class="icon-tags"></i>
+        <a href="/tags/算法/">算法</a>
+    </span>
+    
+
+    </div>
+
+    
+  </div>
+</article>
+
+  
+
+
+
+
+
+
+
+
+
+    </main>
+
+    <footer class="site-footer">
+  <p class="site-info">
+    Proudly powered by <a href="https://hexo.io/" target="_blank">Hexo</a> and
+    Theme by <a href="https://github.com/520MianXiangDuiXiang520/Hacker" target="_blank">Hacker</a>
+    </br>
+    
+    &copy; 2024 Junebao
+    
+  </p>
+</footer>
+    
+    
+  </div>
+</div>
+</body>
+</html>
