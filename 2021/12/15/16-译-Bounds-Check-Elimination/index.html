@@ -1,0 +1,222 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>【译】Bounds Check Elimination 边界检查消除 | Junebao</title>
+
+  
+  <meta name="author" content="Junebao">
+  
+
+  
+  <meta name="description" content="Go 是一种内存安全的语言，在针对数组 (array) 或 Slice 做索引和切片操作时，Go 的运行时（runtime）会检查所涉及的索引是否超出范围。如果索引超出范围，将产生一个 Panic，以防止无效索引造成的伤害。这就是边界检查（BCE）。边界检查使我们的代码能够安全地运行，但也会影响一定的性能。">
+  
+
+  
+  
+  <meta name="keywords" content="go,译文">
+  
+
+  <meta id="viewport" name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  <meta property="og:title" content="【译】Bounds Check Elimination 边界检查消除"/>
+
+  <meta property="og:site_name" content="Junebao"/>
+
+  
+  <meta property="og:image" content="/favicon.ico"/>
+  
+
+  <link href="/favicon.ico" rel="icon">
+  <link rel="alternate" href="/atom.xml" title="Junebao" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+<div class="blog">
+  <div class="content">
+
+    <header>
+  <div class="site-branding">
+    <h1 class="site-title">
+      <a href="/">Junebao</a>
+    </h1>
+    <p class="site-description"></p>
+  </div>
+  <nav class="site-navigation">
+    <ul>
+      
+        
+          <li><a class="menu-uncover-a" href="/">主页</li>
+        
+      
+        
+          <li><a class="menu-uncover-a" href="/archives">归档</li>
+        
+      
+        
+          <li><a class="menu-uncover-a" href="/tags">标签</li>
+        
+      
+        
+          <li><a class="menu-uncover-a" href="/about">关于</li>
+        
+      
+    </ul>
+  </nav>
+</header>
+
+    <main class="site-main posts-loop">
+    <article>
+
+  
+    
+    <h3 class="article-title"><span>【译】Bounds Check Elimination 边界检查消除</span></h3>
+    
+  
+
+  <div class="article-top-meta">
+    <span class="posted-on">
+      <a href="/2021/12/15/16-译-Bounds-Check-Elimination/" rel="bookmark">
+        <time class="entry-date published" datetime="2021-12-15T04:55:15.000Z">
+          2021-12-15
+        </time>
+      </a>
+    </span>
+  </div>
+
+
+  
+
+  <div class="article-content">
+    <div class="entry">
+      
+        <p>Go 是一种内存安全的语言，在针对数组 (array) 或 Slice 做索引和切片操作时，Go 的运行时（runtime）会检查所涉及的索引是否超出范围。如果索引超出范围，将产生一个 Panic，以防止无效索引造成的伤害。这就是边界检查（BCE）。边界检查使我们的代码能够安全地运行，但也会影响一定的性能。</p>
+<span id="more"></span>
+
+<blockquote>
+<p>原文链接：<br> <a target="_blank" rel="noopener" href="https://go101.org/article/bounds-check-elimination.html">Bounds Check Elimination</a></p>
+</blockquote>
+<p>自从 Go Toolchain 1.7 以后，标准的 Go 编译器采用了一个基于 SSA (静态单赋值形式)的新的编译器后端。SSA 帮助 Go 编译器有效地进行代码优化，比如 BCE (边界检查消除) 和 CSE (公共子表达式消除)。BCE 可以避免一些不必要的边界检查，CSE 可以避免一些重复的计算，如此使得标准的 Go 编译器可以生成更高效的程序。有时这些优化的改进效果是显而易见的。</p>
+<p>本文将列出一些示例，说明 BCE 如何与标准的 Go 编译器1.7 + 协同工作。</p>
+<p>对于 Go Toolchain 1.7 + ，我们可以使用 <code>-gcflags = “-d=ssa/check _ bce/debug=1” </code>编译器标志来显示哪些代码行仍然需要进行边界检查。</p>
+<h2 id="例-1"><a href="#例-1" class="headerlink" title="例 1"></a>例 1</h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// example1.go</span></span><br><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">f1</span><span class="params">(s []<span class="type">int</span>)</span></span> &#123;</span><br><span class="line">	_ = s[<span class="number">0</span>] <span class="comment">// line 5: 需要边界检查</span></span><br><span class="line">	_ = s[<span class="number">1</span>] <span class="comment">// line 6: 需要边界检查</span></span><br><span class="line">	_ = s[<span class="number">2</span>] <span class="comment">// line 7: 需要边界检查</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">f2</span><span class="params">(s []<span class="type">int</span>)</span></span> &#123;</span><br><span class="line">	_ = s[<span class="number">2</span>] <span class="comment">// line 11: 需要边界检查</span></span><br><span class="line">	_ = s[<span class="number">1</span>] <span class="comment">// line 12: 边界检查被消除</span></span><br><span class="line">	_ = s[<span class="number">0</span>] <span class="comment">// line 13: 边界检查被消除</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">f3</span><span class="params">(s []<span class="type">int</span>, index <span class="type">int</span>)</span></span> &#123;</span><br><span class="line">	_ = s[index] <span class="comment">// line 17: 需要边界检查</span></span><br><span class="line">	_ = s[index] <span class="comment">// line 18: 边界检查被消除</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">f4</span><span class="params">(a [5]<span class="type">int</span>)</span></span> &#123;</span><br><span class="line">	_ = a[<span class="number">4</span>] <span class="comment">// line 22: 边界检查被消除</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ go run -gcflags=&quot;-d=ssa/check_bce/debug=<span class="number">1</span>&quot; example1.go</span><br><span class="line">./example1.go:<span class="number">5</span>: Found IsInBounds</span><br><span class="line">./example1.go:<span class="number">6</span>: Found IsInBounds</span><br><span class="line">./example1.go:<span class="number">7</span>: Found IsInBounds</span><br><span class="line">./example1.go:<span class="number">11</span>: Found IsInBounds</span><br><span class="line">./example1.go:<span class="number">17</span>: Found IsInBounds</span><br></pre></td></tr></table></figure>
+
+<p>我们可以看到，没有必要为函数 <code>f2</code> 中的第 12 行和第 13 行进行边界检查，因为第 11 行的边界检查确保了第 12 行和第 13 行的索引不会超出范围。</p>
+<p>但在函数 <code>f1</code> 中，必须对这三行都进行边界检查。因为第 5 行的边界检查不能保证第六行和第七行的安全，同样第六行的检查也不能保证第七行的安全。</p>
+<p>而对于函数 <code>f3</code>，编译器知道如果第一个 <code>s [ index ]</code> 是安全的，那么第二个 <code> s [ index ]</code> 就也是绝对安全的。</p>
+<p>编译器还能正确地判断出 <code>f4</code> 中的唯一一行（22行）是安全的。</p>
+<h2 id="例-2"><a href="#例-2" class="headerlink" title="例 2"></a>例 2</h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// example2.go</span></span><br><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">f5</span><span class="params">(s []<span class="type">int</span>)</span></span> &#123;</span><br><span class="line">	<span class="keyword">for</span> i := <span class="keyword">range</span> s &#123;</span><br><span class="line">		_ = s[i]</span><br><span class="line">		_ = s[i:<span class="built_in">len</span>(s)]</span><br><span class="line">		_ = s[:i+<span class="number">1</span>]</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">f6</span><span class="params">(s []<span class="type">int</span>)</span></span> &#123;</span><br><span class="line">	<span class="keyword">for</span> i := <span class="number">0</span>; i &lt; <span class="built_in">len</span>(s); i++ &#123;</span><br><span class="line">		_ = s[i]</span><br><span class="line">		_ = s[i:<span class="built_in">len</span>(s)]</span><br><span class="line">		_ = s[:i+<span class="number">1</span>]</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">f7</span><span class="params">(s []<span class="type">int</span>)</span></span> &#123;</span><br><span class="line">	<span class="keyword">for</span> i := <span class="built_in">len</span>(s) - <span class="number">1</span>; i &gt;= <span class="number">0</span>; i-- &#123;</span><br><span class="line">		_ = s[i]</span><br><span class="line">		_ = s[i:<span class="built_in">len</span>(s)]</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">f8</span><span class="params">(s []<span class="type">int</span>, index <span class="type">int</span>)</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> index &gt;= <span class="number">0</span> &amp;&amp; index &lt; <span class="built_in">len</span>(s) &#123;</span><br><span class="line">		_ = s[index]</span><br><span class="line">		_ = s[index:<span class="built_in">len</span>(s)]</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">f9</span><span class="params">(s []<span class="type">int</span>)</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(s) &gt; <span class="number">2</span> &#123;</span><br><span class="line">	    _, _, _ = s[<span class="number">0</span>], s[<span class="number">1</span>], s[<span class="number">2</span>]</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ go run -gcflags=&quot;-d=ssa/check_bce/debug=<span class="number">1</span>&quot; example2.go</span><br></pre></td></tr></table></figure>
+
+<p>酷! 标准编译器删除程序中的所有绑定检查。</p>
+<p>注意: 在 Go Toolchain 1.11 版本之前，标准编译器不够智能，无法检测到第22行是安全的。</p>
+<h2 id="例3"><a href="#例3" class="headerlink" title="例3"></a>例3</h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// example3.go</span></span><br><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> <span class="string">&quot;math/rand&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">fa</span><span class="params">()</span></span> &#123;</span><br><span class="line">	s := []<span class="type">int</span>&#123;<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>&#125;</span><br><span class="line">	index := rand.Intn(<span class="number">7</span>)</span><br><span class="line">	_ = s[:index] <span class="comment">// line 9: bounds check</span></span><br><span class="line">	_ = s[index:] <span class="comment">// line 10: bounds check eliminated!</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">fb</span><span class="params">(s []<span class="type">int</span>, i <span class="type">int</span>)</span></span> &#123;</span><br><span class="line">	_ = s[:i] <span class="comment">// line 14: bounds check</span></span><br><span class="line">	_ = s[i:] <span class="comment">// line 15: bounds check, not smart enough?</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">fc</span><span class="params">()</span></span> &#123;</span><br><span class="line">	s := []<span class="type">int</span>&#123;<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>&#125;</span><br><span class="line">	s = s[:<span class="number">4</span>]</span><br><span class="line">	i := rand.Intn(<span class="number">7</span>)</span><br><span class="line">	_ = s[:i] <span class="comment">// line 22: bounds check</span></span><br><span class="line">	_ = s[i:] <span class="comment">// line 23: bounds check, not smart enough?</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ go run -gcflags=&quot;-d=ssa/check_bce/debug=<span class="number">1</span>&quot; example3.go</span><br><span class="line">./example3.go:<span class="number">9</span>: Found IsSliceInBounds</span><br><span class="line">./example3.go:<span class="number">14</span>: Found IsSliceInBounds</span><br><span class="line">./example3.go:<span class="number">15</span>: Found IsSliceInBounds</span><br><span class="line">./example3.go:<span class="number">22</span>: Found IsSliceInBounds</span><br><span class="line">./example3.go:<span class="number">23</span>: Found IsSliceInBounds</span><br></pre></td></tr></table></figure>
+
+<p>哦，这么多地方还需要做边界检查！</p>
+<p>但是，为什么标准的 Go 编译器认为第 10 行是安全的，而第 15 行和第 23 行却不是呢？编译器还不够聪明吗？</p>
+<p>事实上，编译器设计如此！为什么？原因是子切片表达式中的起始索引可能大于原始切片的长度。让我们看一个简单的例子:</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	s0 := <span class="built_in">make</span>([]<span class="type">int</span>, <span class="number">5</span>, <span class="number">10</span>) <span class="comment">// len(s0) == 5, cap(s0) == 10</span></span><br><span class="line"></span><br><span class="line">	index := <span class="number">8</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 在 go 中，对于子切片语法 s[a:b] 必须保证 0 &lt;= a &lt;= b &lt;= cap(s)</span></span><br><span class="line">    <span class="comment">// 否则会引起 panic</span></span><br><span class="line"></span><br><span class="line">	_ = s0[:index]</span><br><span class="line">	</span><br><span class="line">    <span class="comment">// 上面一行是安全的，但不能保证下面一行也是安全的</span></span><br><span class="line">    <span class="comment">// 事实上，下面一行将会导致 panic</span></span><br><span class="line">	_ = s0[index:] <span class="comment">// panic</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>因此，只有满足 <code>len(s) == cap(s)</code> 时，才能根据 <code>s[:index]</code> 是安全的得出 <code>s[index:]</code> 也是安全地的结论，这就是为什么函数 <code>fb</code> 和 <code>fc</code> 中的代码行仍然需要进行边界检查的原因。</p>
+<p>标准 Go 编译器成功地检测到函数 <code>fa</code> 中的 <code>len (s)</code> 等于 <code>cap (s)</code> 干得好! Go团队加油！</p>
+<h2 id="例4"><a href="#例4" class="headerlink" title="例4"></a>例4</h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// example4.go</span></span><br><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> <span class="string">&quot;math/rand&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">fb2</span><span class="params">(s []<span class="type">int</span>, index <span class="type">int</span>)</span></span> &#123;</span><br><span class="line">	_ = s[index:] <span class="comment">// line 7: bounds check</span></span><br><span class="line">	_ = s[:index] <span class="comment">// line 8: bounds check eliminated!</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">fc2</span><span class="params">()</span></span> &#123;</span><br><span class="line">	s := []<span class="type">int</span>&#123;<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>&#125;</span><br><span class="line">	s = s[:<span class="number">4</span>]</span><br><span class="line">	index := rand.Intn(<span class="number">7</span>)</span><br><span class="line">	_ = s[index:] <span class="comment">// line 15 bounds check</span></span><br><span class="line">	_ = s[:index] <span class="comment">// line 16: bounds check eliminated!</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ go run -gcflags=&quot;-d=ssa/check_bce/debug=<span class="number">1</span>&quot; example4.go</span><br><span class="line">./example4.go:<span class="number">7</span>:<span class="number">7</span>: Found IsSliceInBounds</span><br><span class="line">./example4.go:<span class="number">15</span>:<span class="number">7</span>: Found IsSliceInBounds</span><br></pre></td></tr></table></figure>
+
+<p>在这个例子中，go 编译器成功推断出：</p>
+<ul>
+<li>如果第 7 行是安全的，那么第 8 行也是安全地</li>
+<li>如果第 15 行是安全的，那么第 16 行也是安全地</li>
+</ul>
+<p>注意:在1.9版本之前的 Go Toolchain 中，标准的 Go 编译器无法检测到第 8 行不需要边界检查。</p>
+<h2 id="例-5"><a href="#例-5" class="headerlink" title="例 5"></a>例 5</h2><p>当前版本的标准 Go 编译器不够聪明，无法消除所有不必要的边界检查。有时，我们可以做一些提示来帮助编译器消除一些不必要的边界检查.</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// example5.go</span></span><br><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">fd</span><span class="params">(is []<span class="type">int</span>, bs []<span class="type">byte</span>)</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(is) &gt;= <span class="number">256</span> &#123;</span><br><span class="line">		<span class="keyword">for</span> _, n := <span class="keyword">range</span> bs &#123;</span><br><span class="line">			_ = is[n] <span class="comment">// line 7: bounds check</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">fd2</span><span class="params">(is []<span class="type">int</span>, bs []<span class="type">byte</span>)</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(is) &gt;= <span class="number">256</span> &#123;</span><br><span class="line">		is = is[:<span class="number">256</span>] <span class="comment">// line 14: a hint</span></span><br><span class="line">		<span class="keyword">for</span> _, n := <span class="keyword">range</span> bs &#123;</span><br><span class="line">			_ = is[n] <span class="comment">// line 16: BCEed!</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">fe</span><span class="params">(isa []<span class="type">int</span>, isb []<span class="type">int</span>)</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(isa) &gt; <span class="number">0xFFF</span> &#123;</span><br><span class="line">		<span class="keyword">for</span> _, n := <span class="keyword">range</span> isb &#123;</span><br><span class="line">			_ = isa[n &amp; <span class="number">0xFFF</span>] <span class="comment">// line 24: bounds check</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">fe2</span><span class="params">(isa []<span class="type">int</span>, isb []<span class="type">int</span>)</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(isa) &gt; <span class="number">0xFFF</span> &#123;</span><br><span class="line">		isa = isa[:<span class="number">0xFFF</span>+<span class="number">1</span>] <span class="comment">// line 31: a hint</span></span><br><span class="line">		<span class="keyword">for</span> _, n := <span class="keyword">range</span> isb &#123;</span><br><span class="line">			_ = isa[n &amp; <span class="number">0xFFF</span>] <span class="comment">// line 33: BCEed!</span></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ go run -gcflags=&quot;-d=ssa/check_bce/debug=<span class="number">1</span>&quot; example5.go</span><br><span class="line">./example5.go:<span class="number">7</span>: Found IsInBounds</span><br><span class="line">./example5.go:<span class="number">24</span>: Found IsInBounds</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>核心的思想就是尽量消除在循环中的边界检查，这个例子有点奇怪，可以看下面这个：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// example4.go</span></span><br><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">bad</span><span class="params">(a, b []<span class="type">int64</span>, n <span class="type">int</span>)</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(a) &gt;= n &amp;&amp; <span class="built_in">len</span>(b) &gt;= n &#123;</span><br><span class="line">		<span class="keyword">for</span> i, v := <span class="keyword">range</span> b &#123;</span><br><span class="line">			a[i] = v</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">good</span><span class="params">(a, b []<span class="type">int64</span>, n <span class="type">int</span>)</span></span> &#123;</span><br><span class="line">	<span class="keyword">if</span> <span class="built_in">len</span>(a) &gt;= n &amp;&amp; <span class="built_in">len</span>(b) &gt;= n &#123;</span><br><span class="line">		a = a[:n]</span><br><span class="line">		b = b[:n]</span><br><span class="line">		<span class="keyword">for</span> i, v := <span class="keyword">range</span> b &#123;</span><br><span class="line">			a[i] = v</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ go run -gcflags=&quot;-d=ssa/check_bce/debug=<span class="number">1</span>&quot; .\example2.go</span><br><span class="line"># command-line-arguments</span><br><span class="line">.\example2.go:<span class="number">7</span>:<span class="number">5</span>: Found IsInBounds</span><br><span class="line">.\example2.go:<span class="number">14</span>:<span class="number">8</span>: Found IsSliceInBounds</span><br></pre></td></tr></table></figure>
+
+<p>通过 14 15 行的子切片操作，我们可以把边界检查放到循环之外，简单跑一下 Benchmark 差距还是挺明显的</p>
+<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">cpu: Intel(R) Core(TM) i7-7500U CPU @ 2.70GHz</span><br><span class="line">BenchmarkBCE</span><br><span class="line">BenchmarkBCE/good</span><br><span class="line">BenchmarkBCE/good-4         	  296671	      4912 ns/op</span><br><span class="line">BenchmarkBCE/bad</span><br><span class="line">BenchmarkBCE/bad-4          	  182302	      6136 ns/op</span><br><span class="line">PASS</span><br></pre></td></tr></table></figure>
+</blockquote>
+<h2 id="摘要"><a href="#摘要" class="headerlink" title="摘要"></a>摘要</h2><p>标准的 Go 编译器进行了更多的 BCE 优化。它们可能不像上面列出的那么明显，所以本文不会全部展示。</p>
+<p>尽管标准 Go 编译器中的 BCE 特性仍然不够完美，但对于许多常见情况来说，它确实做得很好。毫无疑问，标准的 Go 编译器在以后的版本中会做得更好，这样上面第5个例子中的提示可能就没有必要了。谢谢团队增加了这个美妙的功能！</p>
+<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ol>
+<li><a target="_blank" rel="noopener" href="https://docs.google.com/document/d/1vdAEAjYdzjnPA9WDOQ1e4e05cYVMpqSxJYZT33Cqw2g">Bounds Check Elimination 边界检查消除</a></li>
+<li><a target="_blank" rel="noopener" href="https://talks.godoc.org/github.com/klauspost/talks/2016/go17-compiler.slide">Utilizing the Go 1.7 SSA Compiler 使用 Go 1.7 SSA 编译器</a> (and (及<a target="_blank" rel="noopener" href="https://talks.godoc.org/github.com/klauspost/talks/2016/go17-compiler-2.slide">the second part 第二部分</a>)</li>
+</ol>
+
+      
+    </div>
+
+  </div>
+
+  <div class="article-footer">
+    <div class="article-meta pull-left">
+
+    
+      
+
+    <span class="post-categories">
+      <i class="icon-categories"></i>
+        <a href="/categories/Go/">Go</a>
+    </span>
+    
+
+    
+    
+
+    <span class="post-tags">
+      <i class="icon-tags"></i>
+        <a href="/tags/go/">go</a><a href="/tags/译文/">译文</a>
+    </span>
+    
+
+    </div>
+
+    
+  </div>
+</article>
+
+  
+
+
+
+
+
+
+
+
+
+    </main>
+
+    <footer class="site-footer">
+  <p class="site-info">
+    Proudly powered by <a href="https://hexo.io/" target="_blank">Hexo</a> and
+    Theme by <a href="https://github.com/520MianXiangDuiXiang520/Hacker" target="_blank">Hacker</a>
+    </br>
+    
+    &copy; 2024 Junebao
+    
+  </p>
+</footer>
+    
+    
+  </div>
+</div>
+</body>
+</html>
