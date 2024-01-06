@@ -10,7 +10,8 @@
   
 
   
-  <meta name="description" content="Go Context 源码在 Go 服务中，往往由一个独立的 goroutine 去处理一次请求，但在这个 goroutine 中，可能会开启别的 goroutine 去执行一些具体的事务，如数据库，RPC 等，同时，这一组 goroutine 可能还需要共同访问一些特殊的值，如用户 token, ">
+  <meta name="description" content="在 Go 服务中，往往由一个独立的 goroutine 去处理一次请求，但在这个 goroutine 中，可能会开启别的 goroutine 去执行一些具体的事务，如数据库，RPC 等，同时，这一组 goroutine 可能还需要共同访问一些特殊的值，如用户 token, 请求过期时间等，当一个请求超时后，我们希望与此请求有关的所有 goroutine 都能快速退出，以回收系统资源。
+context 包由谷歌开源，在 Go 1.7 时加入标准库，使用它可以很容易的把特定的值，取消信号， 截止日期传递给请求所涉及的所有 goroutine。">
   
 
   
@@ -95,8 +96,10 @@
   <div class="article-content">
     <div class="entry">
       
-        <h1 id="Go-Context-源码"><a href="#Go-Context-源码" class="headerlink" title="Go Context 源码"></a>Go Context 源码</h1><p>在 Go 服务中，往往由一个独立的 goroutine 去处理一次请求，但在这个 goroutine 中，可能会开启别的 goroutine 去执行一些具体的事务，如数据库，RPC 等，同时，这一组 goroutine 可能还需要共同访问一些特殊的值，如用户 token, 请求过期时间等，当一个请求超时后，我们希望与此请求有关的所有 goroutine 都能快速退出，以回收系统资源。</p>
+        <p>在 Go 服务中，往往由一个独立的 goroutine 去处理一次请求，但在这个 goroutine 中，可能会开启别的 goroutine 去执行一些具体的事务，如数据库，RPC 等，同时，这一组 goroutine 可能还需要共同访问一些特殊的值，如用户 token, 请求过期时间等，当一个请求超时后，我们希望与此请求有关的所有 goroutine 都能快速退出，以回收系统资源。</p>
 <p>context 包由谷歌开源，在 Go 1.7 时加入标准库，使用它可以很容易的把特定的值，取消信号， 截止日期传递给请求所涉及的所有 goroutine。</p>
+<span id="more"></span>
+
 <p>context 包的核心是 <code>Context</code> 接口，其结构如下：</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Context <span class="keyword">interface</span> &#123;</span><br><span class="line">    Done() &lt;-<span class="keyword">chan</span> <span class="keyword">struct</span>&#123;&#125;</span><br><span class="line">    Err() <span class="type">error</span></span><br><span class="line">    Deadline() (deadline time.Time, ok <span class="type">bool</span>)</span><br><span class="line">    Value(key <span class="keyword">interface</span>&#123;&#125;) <span class="keyword">interface</span>&#123;&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
